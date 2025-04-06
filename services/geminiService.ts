@@ -1,6 +1,6 @@
 import { Message } from '../hooks/useChat';
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 const SYSTEM_MESSAGE = `You are a Bible-based AI assistant. Your responses must be:
 1. Strictly grounded in the Holy Bible
 2. Include relevant scripture references
