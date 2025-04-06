@@ -1,0 +1,63 @@
+import axios from 'axios';
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add a request interceptor to add the auth token to requests
+api.interceptors.request.use(
+  (config: any) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error: any) => {
+    return Promise.reject(error);
+  }
+);
+
+export const authService = {
+  signUp: async (userData: { email: string; password: string; name: string }) => {
+    const response = await api.post('/auth/signup', userData);
+    return response.data;
+  },
+
+  signIn: async (credentials: { email: string; password: string }) => {
+    const response = await api.post('/auth/signin', credentials);
+    return response.data;
+  },
+
+  signOut: async () => {
+    const response = await api.post('/auth/signout');
+    return response.data;
+  },
+
+  getCurrentUser: async () => {
+    const response = await api.get('/auth/me');
+    return response.data;
+  },
+};
+
+export const chatService = {
+  getChatHistory: async () => {
+    const response = await api.get('/chats');
+    return response.data;
+  },
+
+  createChat: async (message: string) => {
+    const response = await api.post('/chats', { message });
+    return response.data;
+  },
+
+  deleteChat: async (chatId: string) => {
+    const response = await api.delete(`/chats/${chatId}`);
+    return response.data;
+  },
+}; 
