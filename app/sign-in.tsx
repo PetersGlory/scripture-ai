@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import tw from 'twrnc';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'expo-router';
@@ -38,6 +38,7 @@ export default function SignInScreen() {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          editable={!loading}
         />
       </View>
 
@@ -49,24 +50,32 @@ export default function SignInScreen() {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          editable={!loading}
         />
       </View>
 
       <TouchableOpacity
-        style={tw`bg-blue-500 p-4 rounded-lg mb-4`}
+        style={tw`bg-blue-500 p-4 rounded-lg mb-4 ${loading ? 'opacity-50' : ''}`}
         onPress={handleSignIn}
         disabled={loading}
       >
-        <Text style={tw`text-white text-center font-medium`}>
-          {loading ? 'Signing in...' : 'Sign In'}
-        </Text>
+        {loading ? (
+          <View style={tw`flex-row items-center justify-center`}>
+            <ActivityIndicator color="white" />
+            <Text style={tw`text-white text-center font-medium ml-2`}>
+              Signing in...
+            </Text>
+          </View>
+        ) : (
+          <Text style={tw`text-white text-center font-medium`}>Sign In</Text>
+        )}
       </TouchableOpacity>
 
       <View style={tw`flex-row justify-center`}>
         <Text style={tw`text-gray-600`}>Don't have an account? </Text>
         <Link href="/sign-up" asChild>
-          <TouchableOpacity>
-            <Text style={tw`text-blue-500`}>Sign Up</Text>
+          <TouchableOpacity disabled={loading}>
+            <Text style={tw`text-blue-500 ${loading ? 'opacity-50' : ''}`}>Sign Up</Text>
           </TouchableOpacity>
         </Link>
       </View>

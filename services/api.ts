@@ -1,6 +1,7 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://scripture-ai-backend.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -11,12 +12,16 @@ const api = axios.create({
 
 // Add a request interceptor to add the auth token to requests
 api.interceptors.request.use(
-  (config: any) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  async (config: any) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    } catch (error) {
+      return Promise.reject(error);
     }
-    return config;
   },
   (error: any) => {
     return Promise.reject(error);

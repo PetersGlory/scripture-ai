@@ -8,11 +8,11 @@ import { Chat } from '../hooks/useChat';
 interface ChatHistoryProps {
   onSelectChat: (chatId: string) => void;
   onDeleteChat: (chatId: string) => void;
+  loading: boolean;
 }
 
-export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSelectChat, onDeleteChat }) => {
+export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSelectChat, onDeleteChat, loading }) => {
   const [chats, setChats] = useState<Chat[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadChats();
@@ -33,7 +33,8 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSelectChat, onDelete
     } catch (error) {
       console.error('Error loading chats:', error);
     } finally {
-      setIsLoading(false);
+          // setIsLoading(false);
+          console.log('Chats loaded');
     }
   };
 
@@ -69,7 +70,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ onSelectChat, onDelete
     </TouchableOpacity>
   );
 
-  if (isLoading) {
+  if (loading) {
     return (
       <View style={tw`flex-1 items-center justify-center`}>
         <Text style={tw`text-gray-500`}>Loading your conversations...</Text>

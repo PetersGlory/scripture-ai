@@ -6,17 +6,20 @@ import { Ionicons } from '@expo/vector-icons';
 interface NavigationBarProps {
   showHistory: boolean;
   onToggleView: () => void;
+  disabled: boolean;
 }
 
 export const NavigationBar: React.FC<NavigationBarProps> = ({
   showHistory,
   onToggleView,
+  disabled,
 }) => {
   return (
     <View style={tw`flex-row items-center justify-between p-4 border-t border-gray-200`}>
       <TouchableOpacity
         onPress={onToggleView}
         style={tw`flex-row items-center`}
+        disabled={disabled}
       >
         <Ionicons
           name={showHistory ? 'chatbubbles-outline' : 'time-outline'}

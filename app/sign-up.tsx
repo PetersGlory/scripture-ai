@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import tw from 'twrnc';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'expo-router';
@@ -43,6 +43,7 @@ export default function SignUpScreen() {
           placeholder="Enter your name"
           value={name}
           onChangeText={setName}
+          editable={!loading}
         />
       </View>
 
@@ -55,6 +56,7 @@ export default function SignUpScreen() {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          editable={!loading}
         />
       </View>
 
@@ -66,6 +68,7 @@ export default function SignUpScreen() {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          editable={!loading}
         />
       </View>
 
@@ -77,24 +80,32 @@ export default function SignUpScreen() {
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
+          editable={!loading}
         />
       </View>
 
       <TouchableOpacity
-        style={tw`bg-blue-500 p-4 rounded-lg mb-4`}
+        style={tw`bg-blue-500 p-4 rounded-lg mb-4 ${loading ? 'opacity-50' : ''}`}
         onPress={handleSignUp}
         disabled={loading}
       >
-        <Text style={tw`text-white text-center font-medium`}>
-          {loading ? 'Creating account...' : 'Sign Up'}
-        </Text>
+        {loading ? (
+          <View style={tw`flex-row items-center justify-center`}>
+            <ActivityIndicator color="white" />
+            <Text style={tw`text-white text-center font-medium ml-2`}>
+              Creating account...
+            </Text>
+          </View>
+        ) : (
+          <Text style={tw`text-white text-center font-medium`}>Sign Up</Text>
+        )}
       </TouchableOpacity>
 
       <View style={tw`flex-row justify-center`}>
         <Text style={tw`text-gray-600`}>Already have an account? </Text>
         <Link href="/sign-in" asChild>
-          <TouchableOpacity>
-            <Text style={tw`text-blue-500`}>Sign In</Text>
+          <TouchableOpacity disabled={loading}>
+            <Text style={tw`text-blue-500 ${loading ? 'opacity-50' : ''}`}>Sign In</Text>
           </TouchableOpacity>
         </Link>
       </View>
