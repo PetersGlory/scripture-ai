@@ -3,7 +3,6 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator,
 import tw from 'twrnc';
 import { Ionicons } from '@expo/vector-icons';
 import { useChat } from '../hooks/useChat';
-import { generateResponse } from '../services/geminiService';
 
 export const ChatInterface = () => {
   const {
@@ -39,8 +38,8 @@ export const ChatInterface = () => {
     try {
       await addMessage(userMessage, 'user');
       
-      const response = await generateResponse(currentChat.messages);
-      await addMessage(response, 'assistant');
+      // const response = await generateResponse(currentChat.messages);
+      // await addMessage(response, 'assistant');
     } catch (err) {
       Alert.alert('Error', 'Failed to generate response. Please try again.');
     }

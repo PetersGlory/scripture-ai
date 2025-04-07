@@ -6,6 +6,8 @@ interface User {
   id: string;
   email: string;
   name: string;
+  token?: string;
+  photoURL?: string;
 }
 
 interface AuthContextType {
@@ -35,7 +37,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const storedToken = await AsyncStorage.getItem('token');
       
       if (storedUser && storedToken) {
-        setUser(JSON.parse(storedUser));
+        const userData = JSON.parse(storedUser);
+        setUser({ ...userData, token: storedToken });
       }
     } catch (err) {
       console.error('Error loading stored user:', err);
@@ -49,11 +52,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       setError(null);
       const response = await authService.signIn({ email, password });
+      console.log(response)
       const { token, user } = response;
       
       await AsyncStorage.setItem('token', token);
       await AsyncStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
+      setUser({ ...user, token });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during sign in');
       throw err;
@@ -71,8 +75,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       await AsyncStorage.setItem('token', token);
       await AsyncStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
-    } catch (err) {
+      setUser({ ...user, token });
+    } catch (err:any) {
+      console.log(err.response.data);
       setError(err instanceof Error ? err.message : 'An error occurred during sign up');
       throw err;
     } finally {
@@ -84,11 +89,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       setError(null);
-      await authService.signOut();
+      // await authService.signOut();
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('user');
       setUser(null);
-    } catch (err) {
+    } catch (err:any) {
+      console.log(err.response.data);
       setError(err instanceof Error ? err.message : 'An error occurred during sign out');
       throw err;
     } finally {

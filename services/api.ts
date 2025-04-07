@@ -65,4 +65,32 @@ export const chatService = {
     const response = await api.delete(`/chats/${chatId}`);
     return response.data;
   },
-}; 
+};
+
+export const chatWithAi = async (data: { 
+  message: string; 
+  sessionId?: string; 
+  context?: any; 
+}, token: string) => {
+  const config = {
+    headers: { Authorization: `Bearer ${token}` }
+  };
+  const response = await api.post('/chats', data, config);
+  return response.data;
+};
+
+export const getSessions = async (token: string) => {
+  const config = {
+    headers: { Authorization: `Bearer ${token}` }
+  };
+  const response = await api.get('/chats/sessions', config);
+  return response.data;
+};
+
+export const getChatMessages = async (sessionId: string, token: string) => {
+  const config = {
+    headers: { Authorization: `Bearer ${token}` }
+  };
+  const response = await api.get(`/chats/session/${sessionId}`, config);
+  return response.data;
+};

@@ -1,3 +1,41 @@
+export const colors = {
+  primary: '#1A2238', // Dark navy blue from logo
+  secondary: '#FFB800', // Gold from cross
+  background: '#FFFFFF',
+  surface: '#F8F9FA',
+  text: {
+    primary: '#1A2238',
+    secondary: '#4A5568',
+    light: '#718096'
+  },
+  border: '#E2E8F0',
+  error: '#E53E3E',
+  success: '#48BB78'
+};
+
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48
+};
+
+export const borderRadius = {
+  sm: 4,
+  md: 8,
+  lg: 12,
+  xl: 16,
+  full: 9999
+};
+
+export const shadows = {
+  sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+  md: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+  lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+};
+
 export const theme = {
   colors: {
     primary: {
