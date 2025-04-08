@@ -14,30 +14,70 @@ import { useRouter } from 'expo-router';
 import tw from 'twrnc';
 import { colors } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import CustomAlert from '../components/CustomAlert';
+
+const MAX_MESSAGE_LENGTH = 1000;
 
 export default function ContactUsScreen() {
   const router = useRouter();
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{
+    subject?: string;
+    message?: string;
+  }>({});
+  const [alert, setAlert] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    type: 'error' | 'success' | 'warning' | 'info';
+    onConfirm?: () => void;
+  }>({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'error',
+  });
+
+  const validateForm = () => {
+    const newErrors: typeof errors = {};
+    
+    if (!subject.trim()) {
+      newErrors.subject = 'Subject is required';
+    }
+    
+    if (!message.trim()) {
+      newErrors.message = 'Message is required';
+    } else if (message.length > MAX_MESSAGE_LENGTH) {
+      newErrors.message = `Message cannot exceed ${MAX_MESSAGE_LENGTH} characters`;
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async () => {
-    if (!subject.trim() || !message.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
     try {
       // Here you would typically send the message to your backend
       await new Promise(resolve => setTimeout(resolve, 1500));
-      Alert.alert(
-        'Success',
-        'Your message has been sent. We will get back to you soon.',
-        [{ text: 'OK', onPress: () => router.back() }]
-      );
+      setAlert({
+        visible: true,
+        title: 'Success',
+        message: 'Your message has been sent. We will get back to you soon.',
+        type: 'success',
+        onConfirm: () => router.back(),
+      });
     } catch (error) {
-      Alert.alert('Error', 'Failed to send message. Please try again.');
+      setAlert({
+        visible: true,
+        title: 'Error',
+        message: 'Failed to send message. Please try again.',
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }
@@ -76,33 +116,61 @@ export default function ContactUsScreen() {
               style={tw`
                 bg-[${colors.surface}] p-4 rounded-xl
                 text-[${colors.text.primary}]
+                ${errors.subject ? 'border border-[${colors.error}]' : ''}
               `}
               placeholder="What is your message about?"
               placeholderTextColor={colors.text.light}
               value={subject}
-              onChangeText={setSubject}
+              onChangeText={(text) => {
+                setSubject(text);
+                if (errors.subject) {
+                  setErrors({ ...errors, subject: undefined });
+                }
+              }}
               editable={!loading}
             />
+            {errors.subject && (
+              <Text style={tw`text-[${colors.error}] text-sm mt-1`}>
+                {errors.subject}
+              </Text>
+            )}
           </View>
 
           <View>
-            <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
-              Message
-            </Text>
+            <View style={tw`flex-row justify-between items-center mb-2`}>
+              <Text style={tw`text-[${colors.text.secondary}] font-medium`}>
+                Message
+              </Text>
+              <Text style={tw`text-[${colors.text.light}] text-sm`}>
+                {message.length}/{MAX_MESSAGE_LENGTH}
+              </Text>
+            </View>
             <TextInput
               style={tw`
                 bg-[${colors.surface}] p-4 rounded-xl
                 text-[${colors.text.primary}]
                 min-h-[150px] text-align-vertical-top
+                ${errors.message ? 'border border-[${colors.error}]' : ''}
               `}
               placeholder="Type your message here..."
               placeholderTextColor={colors.text.light}
               value={message}
-              onChangeText={setMessage}
+              onChangeText={(text) => {
+                setMessage(text);
+                if (errors.message) {
+                  setErrors({ ...errors, message: undefined });
+                }
+              }}
               multiline
               numberOfLines={6}
               editable={!loading}
+              maxLength={MAX_MESSAGE_LENGTH}
             />
+            {errors.message && (
+              <Text style={tw`text-[${colors.error}] text-sm mt-1`}>
+                {errors.message}
+              </Text>
+            )}
           </View>
         </View>
 
@@ -137,6 +205,16 @@ export default function ContactUsScreen() {
           </Text>
         </View>
       </ScrollView>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alert.visible}
+        title={alert.title}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert({ ...alert, visible: false })}
+        onConfirm={alert.onConfirm}
+      />
     </KeyboardAvoidingView>
   );
 } 

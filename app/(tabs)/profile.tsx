@@ -16,6 +16,8 @@ import { colors } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { rateApp } from '../../utils/app-rating';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BlurView } from 'expo-blur';
 
 type SettingsSectionProps = {
   title: string;
@@ -126,31 +128,19 @@ export default function ProfileScreen() {
   };
 
   const handleSignOut = async () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Sign Out',
-          style: 'destructive',
-          onPress: async () => {
-            setLoading(true);
-            try {
-              await signOut();
-              router.replace('/sign-in');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to sign out. Please try again.');
-            } finally {
-              setLoading(false);
-            }
-          },
-        },
-      ]
-    );
+      try {
+        setLoading(true);
+        await AsyncStorage.clear();
+        console.log('signOut')
+        signOut();
+        router.replace('/sign-in');
+      } catch (err:any) {
+        console.log(err.response.data);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    
   };
 
   const handleRateApp = () => {
@@ -161,13 +151,28 @@ export default function ProfileScreen() {
   if (loading) {
     return (
       <View style={tw`flex-1 justify-center items-center bg-[${colors.background}]`}>
-        <ActivityIndicator color={colors.primary} />
+        <View style={tw`items-center space-y-4`}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={tw`text-[${colors.text.secondary}]`}>
+            Loading Please Wait...
+          </Text>
+        </View>
       </View>
     );
   }
 
   return (
     <ScrollView style={tw`flex-1 bg-[${colors.background}]`}>
+      <BlurView intensity={80} tint="systemMaterialDark" style={tw`overflow-hidden pt-6`}>
+      <View style={tw`
+        flex-row items-center justify-between 
+        px-4 py-4 border-b border-[${colors.border}]
+      `}>
+        <Text style={tw`text-xl font-semibold text-[${colors.surface}]`}>
+          Profile
+        </Text>
+      </View>
+      </BlurView>
       {/* Profile Header */}
       <View style={tw`items-center pt-6 pb-8`}>
         <View style={tw`relative`}>
@@ -218,6 +223,11 @@ export default function ProfileScreen() {
           icon="person"
           label="Edit Profile"
           onPress={() => router.push('/edit-profile')}
+        />
+        <SettingsItem
+          icon="bookmark-outline"
+          label="Bookmarks"
+          onPress={() => router.push('/bookmarks')}
         />
         <SettingsItem
           icon="notifications"

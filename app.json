@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.jpeg",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.peter2200.scriptureai"
     },
     "web": {
       "bundler": "metro",
@@ -36,6 +37,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "9c1ff371-95ec-43ed-a88c-9ab37edd8bf2"
+      }
+    },
+    "owner": "peter2200"
   }
 }

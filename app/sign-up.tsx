@@ -1,68 +1,132 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, SafeAreaView, Image } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Image,
+} from 'react-native';
+import { useRouter } from 'expo-router';
 import tw from 'twrnc';
-import { useAuth } from '../contexts/AuthContext';
-import { Link } from 'expo-router';
 import { colors } from '../constants/theme';
-import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../contexts/AuthContext';
+import CustomAlert from '../components/CustomAlert';
 
 export default function SignUpScreen() {
+  const router = useRouter();
+  const { user, signUp } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const { signUp, loading, error, clearError } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    type: 'error' | 'success' | 'warning' | 'info';
+    onConfirm?: () => void;
+  }>({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'error',
+  });
+
+  // Redirect if user is already signed in
+  React.useEffect(() => {
+    if (user) {
+      router.replace('/(tabs)');
+    }
+  }, [user]);
 
   const handleSignUp = async () => {
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+    if (!name || !email || !password || !confirmPassword) {
+      setAlert({
+        visible: true,
+        title: 'Error',
+        message: 'Please fill in all fields',
+        type: 'error',
+      });
       return;
     }
 
+    if (password !== confirmPassword) {
+      setAlert({
+        visible: true,
+        title: 'Error',
+        message: 'Passwords do not match',
+        type: 'error',
+      });
+      return;
+    }
+
+    setLoading(true);
     try {
-      await signUp(email, password, name);
-    } catch (err) {
-      // Error is handled by the auth context
+      // Here you would typically call your authentication service
+      const response = await signUp(email, password, name);
+
+      if(response){
+        // For now, we'll just simulate a successful signup
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setAlert({
+          visible: true,
+          title: 'Success',
+          message: 'Account created successfully!',
+          type: 'success',
+          onConfirm: () => router.replace('/(tabs)'),
+        });
+      }
+    } catch (error) {
+      setAlert({
+        visible: true,
+        title: 'Error',
+        message: 'Failed to create account. Please try again.',
+        type: 'error',
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-[${colors.background}]`}>
-      <View style={tw`p-6 flex-1`}>
-        {/* Back Button */}
-        <Link href="/" asChild>
-          <TouchableOpacity 
-            style={tw`flex-row items-center mb-6`}
-            disabled={loading}
-          >
-            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-            <Text style={tw`ml-2 text-[${colors.text.primary}]`}>Back</Text>
-          </TouchableOpacity>
-        </Link>
-
-        <View style={tw`items-center mb-12`}>
+    <KeyboardAvoidingView
+      style={tw`flex-1 bg-[${colors.background}]`}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    >
+      <View style={tw`flex-1 p-4 justify-center`}>
+        {/* Logo and Title */}
+        <View style={tw`items-center mb-8`}>
           <Image
             source={require('../assets/images/logo.jpeg')}
-            style={tw`w-16 h-16 mb-4`}
+            style={tw`w-20 h-20 mb-4`}
             resizeMode="contain"
           />
-          <Text style={tw`text-3xl font-bold text-[${colors.text.primary}]`}>
+          <Text style={tw`text-2xl font-bold text-[${colors.text.primary}]`}>
             Create Account
+          </Text>
+          <Text style={tw`text-[${colors.text.secondary}] mt-2`}>
+            Join us today
           </Text>
         </View>
 
-        {error && (
-          <View style={tw`bg-red-50 p-4 rounded-xl mb-4`}>
-            <Text style={tw`text-red-600 text-center`}>{error}</Text>
-          </View>
-        )}
-
-        <View style={tw`space-y-4 mb-6`}>
+        {/* Form */}
+        <View style={tw`space-y-4`}>
           <View>
-            <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>Name</Text>
+            <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
+              Full Name
+            </Text>
             <TextInput
-              style={tw`bg-[${colors.surface}] rounded-xl p-4 text-[${colors.text.primary}]`}
-              placeholder="Enter your name"
+              style={tw`
+                bg-[${colors.surface}] p-4 rounded-xl
+                text-[${colors.text.primary}]
+                border border-[${colors.border}]
+              `}
+              placeholder="Enter your full name"
               placeholderTextColor={colors.text.light}
               value={name}
               onChangeText={setName}
@@ -71,23 +135,35 @@ export default function SignUpScreen() {
           </View>
 
           <View>
-            <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>Email</Text>
+            <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
+              Email
+            </Text>
             <TextInput
-              style={tw`bg-[${colors.surface}] rounded-xl p-4 text-[${colors.text.primary}]`}
+              style={tw`
+                bg-[${colors.surface}] p-4 rounded-xl
+                text-[${colors.text.primary}]
+                border border-[${colors.border}]
+              `}
               placeholder="Enter your email"
               placeholderTextColor={colors.text.light}
               value={email}
               onChangeText={setEmail}
-              keyboardType="email-address"
               autoCapitalize="none"
+              keyboardType="email-address"
               editable={!loading}
             />
           </View>
 
           <View>
-            <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>Password</Text>
+            <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
+              Password
+            </Text>
             <TextInput
-              style={tw`bg-[${colors.surface}] rounded-xl p-4 text-[${colors.text.primary}]`}
+              style={tw`
+                bg-[${colors.surface}] p-4 rounded-xl
+                text-[${colors.text.primary}]
+                border border-[${colors.border}]
+              `}
               placeholder="Create a password"
               placeholderTextColor={colors.text.light}
               value={password}
@@ -98,9 +174,15 @@ export default function SignUpScreen() {
           </View>
 
           <View>
-            <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>Confirm Password</Text>
+            <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
+              Confirm Password
+            </Text>
             <TextInput
-              style={tw`bg-[${colors.surface}] rounded-xl p-4 text-[${colors.text.primary}]`}
+              style={tw`
+                bg-[${colors.surface}] p-4 rounded-xl
+                text-[${colors.text.primary}]
+                border border-[${colors.border}]
+              `}
               placeholder="Confirm your password"
               placeholderTextColor={colors.text.light}
               value={confirmPassword}
@@ -109,36 +191,52 @@ export default function SignUpScreen() {
               editable={!loading}
             />
           </View>
+
+          <TouchableOpacity
+            style={tw`
+              bg-[${colors.primary}] p-4 rounded-xl mt-6
+              ${loading ? 'opacity-50' : ''}
+            `}
+            onPress={handleSignUp}
+            disabled={loading}
+          >
+            {loading ? (
+              <View style={tw`flex-row items-center justify-center`}>
+                <ActivityIndicator color="white" />
+                <Text style={tw`text-white font-semibold ml-2`}>
+                  Creating account...
+                </Text>
+              </View>
+            ) : (
+              <Text style={tw`text-white text-center font-semibold text-lg`}>
+                Sign Up
+              </Text>
+            )}
+          </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
-          style={tw`bg-[${colors.primary}] p-4 rounded-xl mb-4 ${loading ? 'opacity-50' : ''}`}
-          onPress={handleSignUp}
-          disabled={loading}
-        >
-          {loading ? (
-            <View style={tw`flex-row items-center justify-center`}>
-              <ActivityIndicator color="white" />
-              <Text style={tw`text-white font-semibold ml-2`}>
-                Creating account...
-              </Text>
-            </View>
-          ) : (
-            <Text style={tw`text-white text-center font-semibold text-lg`}>Create Account</Text>
-          )}
-        </TouchableOpacity>
-
-        <View style={tw`flex-row justify-center`}>
-          <Text style={tw`text-[${colors.text.secondary}]`}>Already have an account? </Text>
-          <Link href="/sign-in" asChild>
-            <TouchableOpacity disabled={loading}>
-              <Text style={tw`text-[${colors.primary}] font-semibold ${loading ? 'opacity-50' : ''}`}>
-                Sign In
-              </Text>
-            </TouchableOpacity>
-          </Link>
+        {/* Sign In Link */}
+        <View style={tw`flex-row justify-center mt-6`}>
+          <Text style={tw`text-[${colors.text.secondary}]`}>
+            Already have an account?{' '}
+          </Text>
+          <TouchableOpacity onPress={() => router.push('/sign-in')}>
+            <Text style={tw`text-[${colors.primary}] font-semibold`}>
+              Sign In
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
-    </SafeAreaView>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alert.visible}
+        title={alert.title}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert({ ...alert, visible: false })}
+        onConfirm={alert.onConfirm}
+      />
+    </KeyboardAvoidingView>
   );
 } 

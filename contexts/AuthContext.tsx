@@ -14,9 +14,9 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, name: string) => Promise<void>;
-  signOut: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<boolean>;
+  signUp: (email: string, password: string, name: string) => Promise<boolean>;
+  signOut: () => Promise<boolean>;
   clearError: () => void;
 }
 
@@ -25,6 +25,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [signedOut, setSignedOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,6 +33,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const loadStoredUser = async () => {
+    console.log('loadStoredUser')
+    setLoading(true);
+    if(signedOut){
+      setUser(null);
+      setSignedOut(false);
+      return;
+    }
     try {
       const storedUser = await AsyncStorage.getItem('user');
       const storedToken = await AsyncStorage.getItem('token');
@@ -58,9 +66,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await AsyncStorage.setItem('token', token);
       await AsyncStorage.setItem('user', JSON.stringify(user));
       setUser({ ...user, token });
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during sign in');
-      throw err;
+      return false;
     } finally {
       setLoading(false);
     }
@@ -76,27 +85,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await AsyncStorage.setItem('token', token);
       await AsyncStorage.setItem('user', JSON.stringify(user));
       setUser({ ...user, token });
+      return true;
     } catch (err:any) {
       console.log(err.response.data);
       setError(err instanceof Error ? err.message : 'An error occurred during sign up');
-      throw err;
+      return false;
     } finally {
       setLoading(false);
     }
   };
 
   const signOut = async () => {
+    setSignedOut(true);
     try {
       setLoading(true);
-      setError(null);
-      // await authService.signOut();
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('user');
+      // First clear AsyncStorage
+      await AsyncStorage.multiRemove(['user', 'token']);
+      // Then clear the user state
       setUser(null);
-    } catch (err:any) {
-      console.log(err.response.data);
+      setError(null);
+      console.log('Successfully signed out');
+      loadStoredUser();
+      return true;
+    } catch (err) {
+      console.error('Error during sign out:', err);
       setError(err instanceof Error ? err.message : 'An error occurred during sign out');
-      throw err;
+      return false;
     } finally {
       setLoading(false);
     }

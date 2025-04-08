@@ -5,9 +5,10 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   ScrollView,
   Image,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -15,6 +16,7 @@ import tw from 'twrnc';
 import { colors } from '../constants/theme';
 import { useAuth } from '../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import CustomAlert from '../components/CustomAlert';
 
 export default function EditProfileScreen() {
   const router = useRouter();
@@ -23,8 +25,48 @@ export default function EditProfileScreen() {
   const [email, setEmail] = useState(user?.email || '');
   const [loading, setLoading] = useState(false);
   const [photoURL, setPhotoURL] = useState(user?.photoURL || null);
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+  }>({});
+  const [alert, setAlert] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    type: 'error' | 'success' | 'warning' | 'info';
+    onConfirm?: () => void;
+  }>({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'error',
+  });
+  const [isPickingImage, setIsPickingImage] = useState(false);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateForm = () => {
+    const newErrors: typeof errors = {};
+    
+    if (!name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+    
+    if (!email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handlePickImage = async () => {
+    setIsPickingImage(true);
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -39,146 +81,202 @@ export default function EditProfileScreen() {
         setPhotoURL(result.assets[0].uri);
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to update profile photo');
+      setAlert({
+        visible: true,
+        title: 'Error',
+        message: 'Failed to update profile photo',
+        type: 'error',
+      });
+    } finally {
+      setIsPickingImage(false);
     }
   };
 
   const handleSave = async () => {
-    if (!name.trim()) {
-      Alert.alert('Error', 'Name is required');
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
     try {
       // Here you would typically call your API to update the user profile
       await new Promise(resolve => setTimeout(resolve, 1000));
-      Alert.alert('Success', 'Profile updated successfully');
-      router.back();
+      setAlert({
+        visible: true,
+        title: 'Success',
+        message: 'Profile updated successfully',
+        type: 'success',
+        onConfirm: () => router.back(),
+      });
     } catch (error) {
-      Alert.alert('Error', 'Failed to update profile');
+      setAlert({
+        visible: true,
+        title: 'Error',
+        message: 'Failed to update profile',
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <ScrollView style={tw`flex-1 pt-6 bg-[${colors.background}]`}>
-      <View style={tw`p-4`}>
-        {/* Header */}
-        <View style={tw`flex-row items-center mb-6`}>
-          <TouchableOpacity 
-            onPress={() => router.back()}
-            style={tw`p-2`}
-          >
-            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-          </TouchableOpacity>
-          <Text style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
-            Edit Profile
-          </Text>
-        </View>
+    <KeyboardAvoidingView
+      style={tw`flex-1 bg-[${colors.background}]`}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    >
+      <ScrollView style={tw`flex-1 pt-6`}>
+        <View style={tw`p-4`}>
+          {/* Header */}
+          <View style={tw`flex-row items-center mb-6`}>
+            <TouchableOpacity 
+              onPress={() => router.back()}
+              style={tw`p-2`}
+            >
+              <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+            </TouchableOpacity>
+            <Text style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
+              Edit Profile
+            </Text>
+          </View>
 
-        {/* Profile Photo */}
-        <View style={tw`items-center mb-6`}>
-          <TouchableOpacity 
-            onPress={handlePickImage}
-            style={tw`
-              w-24 h-24 rounded-full 
-              bg-[${colors.surface}]
-              items-center justify-center
-              mb-3
-            `}
-          >
-            {photoURL ? (
-              <Image
-                source={{ uri: photoURL }}
-                style={tw`w-24 h-24 rounded-full`}
-              />
-            ) : (
-              <Text style={tw`
-                text-4xl font-bold
-                text-[${colors.primary}]
+          {/* Profile Photo */}
+          <View style={tw`items-center mb-6`}>
+            <TouchableOpacity 
+              onPress={handlePickImage}
+              disabled={isPickingImage}
+              style={tw`
+                w-24 h-24 rounded-full 
+                bg-[${colors.surface}]
+                items-center justify-center
+                mb-3
+                ${isPickingImage ? 'opacity-50' : ''}
+              `}
+            >
+              {isPickingImage ? (
+                <ActivityIndicator color={colors.primary} />
+              ) : photoURL ? (
+                <Image
+                  source={{ uri: photoURL }}
+                  style={tw`w-24 h-24 rounded-full`}
+                />
+              ) : (
+                <Text style={tw`
+                  text-4xl font-bold
+                  text-[${colors.primary}]
+                `}>
+                  {name?.[0]?.toUpperCase() || 'U'}
+                </Text>
+              )}
+              <View style={tw`
+                absolute right-0 bottom-0
+                w-8 h-8 rounded-full
+                bg-[${colors.primary}]
+                items-center justify-center
+                border-4 border-[${colors.background}]
               `}>
-                {name?.[0]?.toUpperCase() || 'U'}
+                <Ionicons name="camera" size={14} color="white" />
+              </View>
+            </TouchableOpacity>
+            <Text style={tw`text-[${colors.text.secondary}]`}>
+              Tap to change photo
+            </Text>
+          </View>
+
+          {/* Form */}
+          <View style={tw`space-y-4`}>
+            <View>
+              <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
+                Name
+              </Text>
+              <TextInput
+                style={tw`
+                  bg-[${colors.surface}] p-4 rounded-xl
+                  text-[${colors.text.primary}]
+                  ${errors.name ? 'border border-[${colors.error}]' : ''}
+                `}
+                placeholder="Enter your name"
+                placeholderTextColor={colors.text.light}
+                value={name}
+                onChangeText={(text) => {
+                  setName(text);
+                  if (errors.name) {
+                    setErrors({ ...errors, name: undefined });
+                  }
+                }}
+                editable={!loading}
+              />
+              {errors.name && (
+                <Text style={tw`text-[${colors.error}] text-sm mt-1`}>
+                  {errors.name}
+                </Text>
+              )}
+            </View>
+
+            <View>
+              <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
+                Email
+              </Text>
+              <TextInput
+                style={tw`
+                  bg-[${colors.surface}] p-4 rounded-xl
+                  text-[${colors.text.primary}]
+                  ${errors.email ? 'border border-[${colors.error}]' : ''}
+                `}
+                placeholder="Enter your email"
+                placeholderTextColor={colors.text.light}
+                value={email}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (errors.email) {
+                    setErrors({ ...errors, email: undefined });
+                  }
+                }}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                editable={!loading}
+              />
+              {errors.email && (
+                <Text style={tw`text-[${colors.error}] text-sm mt-1`}>
+                  {errors.email}
+                </Text>
+              )}
+            </View>
+          </View>
+
+          {/* Save Button */}
+          <TouchableOpacity
+            style={tw`
+              bg-[${colors.primary}] p-4 rounded-xl mt-6
+              ${loading ? 'opacity-50' : ''}
+            `}
+            onPress={handleSave}
+            disabled={loading}
+          >
+            {loading ? (
+              <View style={tw`flex-row items-center justify-center`}>
+                <ActivityIndicator color="white" />
+                <Text style={tw`text-white font-semibold ml-2`}>
+                  Saving...
+                </Text>
+              </View>
+            ) : (
+              <Text style={tw`text-white text-center font-semibold text-lg`}>
+                Save Changes
               </Text>
             )}
-            <View style={tw`
-              absolute right-0 bottom-0
-              w-8 h-8 rounded-full
-              bg-[${colors.primary}]
-              items-center justify-center
-              border-4 border-[${colors.background}]
-            `}>
-              <Ionicons name="camera" size={14} color="white" />
-            </View>
           </TouchableOpacity>
-          <Text style={tw`text-[${colors.text.secondary}]`}>
-            Tap to change photo
-          </Text>
         </View>
+      </ScrollView>
 
-        {/* Form */}
-        <View style={tw`space-y-4`}>
-          <View>
-            <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
-              Name
-            </Text>
-            <TextInput
-              style={tw`
-                bg-[${colors.surface}] p-4 rounded-xl
-                text-[${colors.text.primary}]
-              `}
-              placeholder="Enter your name"
-              placeholderTextColor={colors.text.light}
-              value={name}
-              onChangeText={setName}
-              editable={!loading}
-            />
-          </View>
-
-          <View>
-            <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
-              Email
-            </Text>
-            <TextInput
-              style={tw`
-                bg-[${colors.surface}] p-4 rounded-xl
-                text-[${colors.text.primary}]
-              `}
-              placeholder="Enter your email"
-              placeholderTextColor={colors.text.light}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              editable={!loading}
-            />
-          </View>
-        </View>
-
-        {/* Save Button */}
-        <TouchableOpacity
-          style={tw`
-            bg-[${colors.primary}] p-4 rounded-xl mt-6
-            ${loading ? 'opacity-50' : ''}
-          `}
-          onPress={handleSave}
-          disabled={loading}
-        >
-          {loading ? (
-            <View style={tw`flex-row items-center justify-center`}>
-              <ActivityIndicator color="white" />
-              <Text style={tw`text-white font-semibold ml-2`}>
-                Saving...
-              </Text>
-            </View>
-          ) : (
-            <Text style={tw`text-white text-center font-semibold text-lg`}>
-              Save Changes
-            </Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alert.visible}
+        title={alert.title}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert({ ...alert, visible: false })}
+        onConfirm={alert.onConfirm}
+      />
+    </KeyboardAvoidingView>
   );
 }

@@ -1,7 +1,8 @@
-import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { colors, theme } from '../../constants/theme';
-import { Platform } from 'react-native';
+import { Tabs } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { colors, theme } from "../../constants/theme";
+import { Platform } from "react-native";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 type TabBarIconProps = {
   color: string;
@@ -9,7 +10,7 @@ type TabBarIconProps = {
   focused: boolean;
 };
 
-export default function TabLayout() {
+export function TabLayouts() {
   return (
     <Tabs
       screenOptions={{
@@ -20,8 +21,8 @@ export default function TabLayout() {
           borderTopColor: colors.border,
           elevation: 0,
           shadowOpacity: 0,
-          height: Platform.OS === 'ios' ? 88 : 60,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          height: Platform.OS === "ios" ? 88 : 60,
+          paddingBottom: Platform.OS === "ios" ? 28 : 8,
           paddingTop: 8,
         },
         headerStyle: {
@@ -35,24 +36,25 @@ export default function TabLayout() {
         headerTitleStyle: {
           fontFamily: theme.typography.fontFamily.sans,
           fontSize: theme.typography.fontSize.lg,
-          fontWeight: '600',
+          fontWeight: "600",
         },
         tabBarLabelStyle: {
           fontFamily: theme.typography.fontFamily.sans,
           fontSize: 12,
-          fontWeight: '500',
+          fontWeight: "500",
         },
+        headerShown: false,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Chat',
+          title: "Scripture AI",
           tabBarIcon: ({ color, size, focused }: TabBarIconProps) => (
-            <Ionicons 
-              name={focused ? "chatbubble" : "chatbubble-outline"} 
-              size={size} 
-              color={color} 
+            <Ionicons
+              name={focused ? "chatbubble" : "chatbubble-outline"}
+              size={size}
+              color={color}
             />
           ),
         }}
@@ -60,12 +62,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="history"
         options={{
-          title: 'History',
+          title: "History",
           tabBarIcon: ({ color, size, focused }: TabBarIconProps) => (
-            <Ionicons 
-              name={focused ? "time" : "time-outline"} 
-              size={size} 
-              color={color} 
+            <Ionicons
+              name={focused ? "time" : "time-outline"}
+              size={size}
+              color={color}
             />
           ),
         }}
@@ -73,16 +75,24 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: "Profile",
           tabBarIcon: ({ color, size, focused }: TabBarIconProps) => (
-            <Ionicons 
-              name={focused ? "person" : "person-outline"} 
-              size={size} 
-              color={color} 
+            <Ionicons
+              name={focused ? "person" : "person-outline"}
+              size={size}
+              color={color}
             />
           ),
         }}
       />
     </Tabs>
+  );
+}
+
+export default function TabLayout() {
+  return (
+    <AuthProvider>
+      <TabLayouts />
+    </AuthProvider>
   );
 }
