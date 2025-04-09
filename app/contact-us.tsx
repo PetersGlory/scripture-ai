@@ -201,7 +201,7 @@ export default function ContactUsScreen() {
             Or reach out to us directly:
           </Text>
           <Text style={tw`text-[${colors.primary}] font-medium`}>
-            support@scriptureai.com
+            getscriptureai@gmail.com
           </Text>
         </View>
       </ScrollView>
