@@ -17,6 +17,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<boolean>;
   signUp: (email: string, password: string, name: string) => Promise<boolean>;
   signOut: () => Promise<boolean>;
+  setUserData: (user: User | null) => void;
   clearError: () => void;
 }
 
@@ -25,7 +26,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [signedOut, setSignedOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -33,23 +33,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const loadStoredUser = async () => {
-    console.log('loadStoredUser')
-    setLoading(true);
-    if(signedOut){
-      setUser(null);
-      setSignedOut(false);
-      return;
-    }
     try {
+      setLoading(true);
       const storedUser = await AsyncStorage.getItem('user');
       const storedToken = await AsyncStorage.getItem('token');
       
-      if (storedUser && storedToken) {
-        const userData = JSON.parse(storedUser);
-        setUser({ ...userData, token: storedToken });
+      console.log("loadStoredUser - stored values:", { storedUser, storedToken });
+
+      if (!storedToken || !storedUser) {
+        console.log("No stored credentials found - setting user to null");
+        setUser(null);
+        setUserData(null);
+        return;
       }
+
+      const userData = JSON.parse(storedUser);
+      setUser({ ...userData, token: storedToken });
+      console.log("User data loaded successfully");
     } catch (err) {
       console.error('Error loading stored user:', err);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -96,16 +99,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    setSignedOut(true);
     try {
+      console.log("Starting sign out process");
       setLoading(true);
-      // First clear AsyncStorage
-      await AsyncStorage.multiRemove(['user', 'token']);
-      // Then clear the user state
+
+      // First set user to null
       setUser(null);
-      setError(null);
-      console.log('Successfully signed out');
-      loadStoredUser();
+      
+      // Then clear all storage
+      await AsyncStorage.removeItem("user");
+      await AsyncStorage.removeItem("token");
+      
+      console.log('Successfully signed out and cleared storage');
       return true;
     } catch (err) {
       console.error('Error during sign out:', err);
@@ -114,6 +119,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
+  };
+
+  const setUserData = (user: User | null) => {
+    setUser(user);
   };
 
   const clearError = () => setError(null);
@@ -128,6 +137,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUp,
         signOut,
         clearError,
+        setUserData,
       }}
     >
       {children}

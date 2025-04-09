@@ -66,7 +66,7 @@ export default function CustomAlert({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={tw`flex-1 justify-center items-center bg-black/50`}>
+      <View style={tw`flex-1 justify-center items-center bg-black/50 z-50`}>
         <View style={tw`bg-[${colors.surface}] w-[90%] rounded-2xl p-6`}>
           <View style={tw`items-center mb-4`}>
             <View style={tw`

@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   SafeAreaView,
+  RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import tw from 'twrnc';
@@ -141,6 +142,9 @@ export default function BookmarksScreen() {
             renderItem={renderBookmarkItem}
             keyExtractor={(item) => item.sessionId}
             contentContainerStyle={tw`p-4`}
+            refreshControl={
+              <RefreshControl refreshing={loading} onRefresh={loadBookmarks} />
+            }
           />
         ) : (
           <View style={tw`flex-1 justify-center items-center p-4`}>

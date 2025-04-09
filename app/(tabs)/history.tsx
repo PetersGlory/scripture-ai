@@ -192,7 +192,7 @@ export default function HistoryScreen() {
         <FlatList
           data={sessions}
           renderItem={renderHistoryItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.sessionId}
           contentContainerStyle={tw`p-4`}
           showsVerticalScrollIndicator={false}
           refreshControl={

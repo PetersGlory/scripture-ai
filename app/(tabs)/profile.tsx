@@ -103,7 +103,7 @@ const SettingsItem = ({
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user, signOut, setUserData } = useAuth();
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
@@ -131,8 +131,16 @@ export default function ProfileScreen() {
       try {
         setLoading(true);
         await AsyncStorage.clear();
-        console.log('signOut')
-        signOut();
+        // console.log('signOut')
+        // const res = await signOut();
+
+        await setUserData({
+          id: '',
+          email: '',
+          name: '',
+          token: '',
+          photoURL: '',
+        });
         router.replace('/sign-in');
       } catch (err:any) {
         console.log(err.response.data);

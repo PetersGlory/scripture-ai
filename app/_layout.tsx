@@ -18,6 +18,7 @@ SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   const { user, loading } = useAuth();
+  console.log('user: ', user)
   if (loading) {
     return (
       <View style={tw`flex-1 justify-center items-center bg-[${colors.background}]`}>
@@ -38,7 +39,7 @@ function RootLayoutNav() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      {!user?.token ? (
+      {user == null ? (
         <>
           <Stack.Screen name="sign-in" />
           <Stack.Screen name="sign-up" />

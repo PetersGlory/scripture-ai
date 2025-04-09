@@ -24,6 +24,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { PanGestureHandler, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BlurView } from 'expo-blur';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -63,7 +64,7 @@ const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpaci
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
 export default function WelcomeScreen() {
-  const { user } = useAuth();
+  const { user, setUserData } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
   const slideProgress = useSharedValue(0);
   const imageScale = useSharedValue(1);
@@ -81,6 +82,17 @@ export default function WelcomeScreen() {
       StatusBar.setBarStyle('default');
     };
   }, [currentSlide]);
+
+  useEffect(() => {
+    const checkIsAuth = async () => {
+      const user = await AsyncStorage.getItem('user');
+      if (!user) {
+        setUserData(null);
+        router.replace('/sign-in');
+      }
+    };
+    checkIsAuth();
+  }, [user]);
 
   const onGestureEvent = useAnimatedGestureHandler({
     onStart: (_, ctx: any) => {

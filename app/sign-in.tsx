@@ -41,7 +41,8 @@ export default function SignInScreen() {
 
   // Redirect if user is already signed in
   React.useEffect(() => {
-    if (user) {
+    console.log(user);
+    if (user !== null) {
       router.replace('/(tabs)');
     }
   }, [user]);
