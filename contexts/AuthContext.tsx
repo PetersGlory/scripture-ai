@@ -13,6 +13,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  setLoading: (loading: boolean) => void;
   error: string | null;
   signIn: (email: string, password: string) => Promise<boolean>;
   signUp: (email: string, password: string, name: string) => Promise<boolean>;
@@ -138,6 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signOut,
         clearError,
         setUserData,
+        setLoading,
       }}
     >
       {children}

@@ -1,6 +1,6 @@
 // import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import React from 'react';
+import React, { useState } from 'react';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -12,13 +12,24 @@ import { ActivityIndicator, View } from 'react-native';
 import tw from "twrnc"
 import { colors } from '@/constants/theme';
 import { Text } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
-  const { user, loading } = useAuth();
-  console.log('user: ', user)
+  const [user, setUser] = useState<any>(null);
+  const { loading, setLoading } = useAuth();
+  useEffect(() => {
+    const getUser = async () => {
+      setLoading(true);
+      const user = await AsyncStorage.getItem('user');
+      setUser(user);
+      setLoading(false);
+    }
+    getUser();
+  }, []);
+
   if (loading) {
     return (
       <View style={tw`flex-1 justify-center items-center bg-[${colors.background}]`}>
