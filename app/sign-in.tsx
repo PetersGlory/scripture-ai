@@ -20,7 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 export default function SignInScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -40,12 +40,12 @@ export default function SignInScreen() {
   });
 
   // Redirect if user is already signed in
-  React.useEffect(() => {
-    console.log(user);
-    if (user !== null) {
-      router.replace('/(tabs)');
-    }
-  }, [user]);
+  // React.useEffect(() => {
+  //   console.log(user);
+  //   if (user !== null) {
+  //     router.replace('/(tabs)');
+  //   }
+  // }, [user]);
 
   const handleSignIn = async () => {
     if (!email || !password) {

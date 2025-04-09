@@ -88,7 +88,7 @@ export default function WelcomeScreen() {
       const user = await AsyncStorage.getItem('user');
       if (!user) {
         setUserData(null);
-        router.replace('/sign-in');
+        // router.replace('/sign-in');
       }
     };
     checkIsAuth();

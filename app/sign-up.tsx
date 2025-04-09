@@ -37,11 +37,11 @@ export default function SignUpScreen() {
   });
 
   // Redirect if user is already signed in
-  React.useEffect(() => {
-    if (user !== null) {
-      router.replace('/(tabs)');
-    }
-  }, [user]);
+  // React.useEffect(() => {
+  //   if (user !== null) {
+  //     router.replace('/(tabs)');
+  //   }
+  // }, [user]);
 
   const handleSignUp = async () => {
     if (!name || !email || !password || !confirmPassword) {
