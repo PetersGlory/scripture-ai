@@ -18,6 +18,7 @@ import { getSessions } from '../../services/api';
 import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
 import CustomAlert from '../../components/CustomAlert';
 import { BlurView } from 'expo-blur';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type ChatSession = {
   id: string;
@@ -53,14 +54,18 @@ export default function HistoryScreen() {
       if (Array.isArray(data)) {
         setSessions(data);
       }
-    } catch (error) {
-      console.error('Error loading chat history:', error);
+    } catch (error: any) {
+      console.error('Error loading chat history:', error.response.data);
       setAlert({
         visible: true,
         title: 'Error',
         message: 'Failed to load chat history. Please try again.',
         type: 'error',
       });
+      if (error.response.status === 401) {
+        AsyncStorage.clear();
+        router.push('/sign-in');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -122,39 +127,48 @@ export default function HistoryScreen() {
   );
 
   const EmptyState = () => (
-    <Animated.View 
+    <Animated.ScrollView 
       entering={FadeInDown}
-      style={tw`flex-1 justify-center items-center p-8`}
+      style={tw`flex-1 p-8`}
+      refreshControl={
+        <RefreshControl 
+          refreshing={refreshing} 
+          onRefresh={onRefresh}
+          tintColor={colors.primary}
+        />
+      }
     >
-      <View style={tw`
-        w-16 h-16 rounded-full 
-        bg-[${colors.surface}] 
-        items-center justify-center 
-        mb-4
-      `}>
-        <Ionicons name="chatbubbles-outline" size={32} color={colors.text.light} />
+      <View style={tw`items-center justify-center`}>
+        <View style={tw`
+          w-16 h-16 rounded-full 
+          bg-[${colors.surface}] 
+          items-center justify-center 
+          mb-4
+        `}>
+          <Ionicons name="chatbubbles-outline" size={32} color={colors.text.light} />
+        </View>
+        <Text style={tw`text-xl font-semibold text-[${colors.text.primary}] mb-2`}>
+          No Chat History
+        </Text>
+        <Text style={tw`
+          text-center text-[${colors.text.secondary}]
+          mb-6
+        `}>
+          Start a new conversation with Scripture AI
+        </Text>
+        <TouchableOpacity
+          style={tw`
+            bg-[${colors.primary}] 
+            px-6 py-3 rounded-2xl
+            flex-row items-center
+          `}
+          onPress={() => router.push('/(tabs)')}
+        >
+          <Ionicons name="add" size={20} color="white" style={tw`mr-2`} />
+          <Text style={tw`text-white font-semibold`}>Start New Chat</Text>
+        </TouchableOpacity>
       </View>
-      <Text style={tw`text-xl font-semibold text-[${colors.text.primary}] mb-2`}>
-        No Chat History
-      </Text>
-      <Text style={tw`
-        text-center text-[${colors.text.secondary}]
-        mb-6
-      `}>
-        Start a new conversation with Scripture AI
-      </Text>
-      <TouchableOpacity
-        style={tw`
-          bg-[${colors.primary}] 
-          px-6 py-3 rounded-2xl
-          flex-row items-center
-        `}
-        onPress={() => router.push('/(tabs)')}
-      >
-        <Ionicons name="add" size={20} color="white" style={tw`mr-2`} />
-        <Text style={tw`text-white font-semibold`}>Start New Chat</Text>
-      </TouchableOpacity>
-    </Animated.View>
+    </Animated.ScrollView>
   );
 
   return (

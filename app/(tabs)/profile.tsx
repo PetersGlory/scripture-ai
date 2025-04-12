@@ -285,6 +285,11 @@ export default function ProfileScreen() {
           icon="star"
           label="Rate App"
           onPress={handleRateApp}
+        />
+        <SettingsItem
+          icon="heart"
+          label="Support Us"
+          onPress={() => router.push('/donate')}
           showBorder={false}
         />
       </SettingsSection>
