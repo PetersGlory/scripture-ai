@@ -6,7 +6,8 @@ import {
   TouchableOpacity, 
   ActivityIndicator,
   RefreshControl,
-  SafeAreaView
+  SafeAreaView,
+  ScrollView
 } from 'react-native';
 import tw from 'twrnc';
 import { colors } from '../../constants/theme';
@@ -15,10 +16,9 @@ import { router } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { getSessions } from '../../services/api';
-import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
 import CustomAlert from '../../components/CustomAlert';
-import { BlurView } from 'expo-blur';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { PRIMARY_COLOR } from '@/constants/Colors';
 
 type ChatSession = {
   id: string;
@@ -55,14 +55,14 @@ export default function HistoryScreen() {
         setSessions(data);
       }
     } catch (error: any) {
-      console.error('Error loading chat history:', error.response.data);
+      console.error('Error loading chat history:', error.response?.data);
       setAlert({
         visible: true,
         title: 'Error',
         message: 'Failed to load chat history. Please try again.',
         type: 'error',
       });
-      if (error.response.status === 401) {
+      if (error.response?.status === 401) {
         AsyncStorage.clear();
         router.push('/sign-in');
       }
@@ -82,16 +82,9 @@ export default function HistoryScreen() {
   };
 
   const renderHistoryItem = ({ item, index }: { item: ChatSession; index: number }) => (
-    <Animated.View
-      entering={FadeInDown.delay(index * 100)}
-      exiting={FadeOutUp}
-    >
+    <View>
       <TouchableOpacity 
-        style={tw`
-          flex-row items-center
-          bg-[${colors.surface}] rounded-2xl
-          p-4 mb-3 border border-[${colors.border}]
-        `}
+        style={tw`flex-row items-center bg-[${colors.surface}] rounded-2xl p-4 mb-3 border border-[${colors.border}]`}
         onPress={() => router.push({
           pathname: '/(tabs)',
           params: {
@@ -100,12 +93,7 @@ export default function HistoryScreen() {
           },
         })}
       >
-        <View style={tw`
-          w-10 h-10 rounded-full
-          bg-[${colors.primary}]/10
-          items-center justify-center
-          mr-3
-        `}>
+        <View style={tw`w-10 h-10 rounded-full bg-[${colors.primary}]/10 items-center justify-center mr-3`}>
           <Ionicons name="chatbubbles-outline" size={20} color={colors.primary} />
         </View>
         <View style={tw`flex-1 mr-3`}>
@@ -123,12 +111,11 @@ export default function HistoryScreen() {
         </View>
         <Ionicons name="chevron-forward" size={20} color={colors.text.light} />
       </TouchableOpacity>
-    </Animated.View>
+    </View>
   );
 
   const EmptyState = () => (
-    <Animated.ScrollView 
-      entering={FadeInDown}
+    <ScrollView 
       style={tw`flex-1 p-8`}
       refreshControl={
         <RefreshControl 
@@ -139,61 +126,42 @@ export default function HistoryScreen() {
       }
     >
       <View style={tw`items-center justify-center`}>
-        <View style={tw`
-          w-16 h-16 rounded-full 
-          bg-[${colors.surface}] 
-          items-center justify-center 
-          mb-4
-        `}>
+        <View style={tw`w-16 h-16 rounded-full bg-[${colors.surface}] items-center justify-center mb-4`}>
           <Ionicons name="chatbubbles-outline" size={32} color={colors.text.light} />
         </View>
         <Text style={tw`text-xl font-semibold text-[${colors.text.primary}] mb-2`}>
           No Chat History
         </Text>
-        <Text style={tw`
-          text-center text-[${colors.text.secondary}]
-          mb-6
-        `}>
+        <Text style={tw`text-center text-[${colors.text.secondary}] mb-6`}>
           Start a new conversation with Scripture AI
         </Text>
         <TouchableOpacity
-          style={tw`
-            bg-[${colors.primary}] 
-            px-6 py-3 rounded-2xl
-            flex-row items-center
-          `}
+          style={tw`bg-[${colors.primary}] px-6 py-3 rounded-2xl flex-row items-center`}
           onPress={() => router.push('/(tabs)')}
         >
           <Ionicons name="add" size={20} color="white" style={tw`mr-2`} />
           <Text style={tw`text-white font-semibold`}>Start New Chat</Text>
         </TouchableOpacity>
       </View>
-    </Animated.ScrollView>
+    </ScrollView>
   );
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-[${colors.background}]`}>
+    <SafeAreaView style={tw`flex-1 py-5 bg-[${colors.background}]`}>
       {/* Header */}
-      <BlurView intensity={80} tint="systemMaterialDark" style={tw`overflow-hidden pt-6`}>
-      <View style={tw`
-        flex-row items-center justify-between 
-        px-4 py-4 border-b border-[${colors.border}]
-      `}>
-        <Text style={tw`text-xl font-semibold text-[${colors.surface}]`}>
-          Chat History
-        </Text>
-        <TouchableOpacity 
-          style={tw`
-            w-10 h-10 rounded-full
-            bg-[${colors.surface}]
-            items-center justify-center
-          `}
-          onPress={() => router.push('/(tabs)')}
-        >
-          <Ionicons name="add" size={24} color={colors.primary} />
-        </TouchableOpacity>
+      <View style={tw`px-4 pt-3 pb-3 bg-white border-b border-gray-200`}>
+        <View style={tw`flex-row items-center justify-between`}>
+          <Text style={tw`text-xl font-bold text-gray-800`}>
+            Chat History
+          </Text>
+          <TouchableOpacity 
+            style={tw`w-10 h-10 rounded-full bg-blue-50 items-center justify-center`}
+            onPress={() => router.push('/(tabs)')}
+          >
+            <Ionicons name="add" size={24} color={PRIMARY_COLOR} />
+          </TouchableOpacity>
+        </View>
       </View>
-      </BlurView>
 
       {loading && !refreshing ? (
         <View style={tw`flex-1 justify-center items-center p-4`}>
@@ -221,7 +189,6 @@ export default function HistoryScreen() {
         <EmptyState />
       )}
 
-      {/* Custom Alert */}
       <CustomAlert
         visible={alert.visible}
         title={alert.title}
@@ -231,4 +198,4 @@ export default function HistoryScreen() {
       />
     </SafeAreaView>
   );
-} 
+}

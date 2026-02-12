@@ -24,3 +24,7 @@ export const Colors = {
     tabIconSelected: tintColorDark,
   },
 };
+
+
+// Color combo
+export const PRIMARY_COLOR = "#4A7C59";

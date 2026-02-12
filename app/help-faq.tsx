@@ -13,9 +13,7 @@ import { useRouter } from 'expo-router';
 import tw from 'twrnc';
 import { colors } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
 
-// FAQ data
 const faqItems = [
   {
     question: 'What is Scripture-ai?',
@@ -59,16 +57,11 @@ const faqItems = [
   }
 ];
 
-// FAQ Item Component
 const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <Animated.View 
-      entering={FadeInDown}
-      exiting={FadeOutUp}
-      style={tw`border-b border-[${colors.border}]`}
-    >
+    <View style={tw`border-b border-[${colors.border}]`}>
       <TouchableOpacity
         style={tw`p-4 flex-row items-center justify-between`}
         onPress={() => setExpanded(!expanded)}
@@ -83,17 +76,13 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
         />
       </TouchableOpacity>
       {expanded && (
-        <Animated.View 
-          entering={FadeInDown}
-          exiting={FadeOutUp}
-          style={tw`px-4 pb-4`}
-        >
+        <View style={tw`px-4 pb-4`}>
           <Text style={tw`text-[${colors.text.secondary}]`}>
             {answer}
           </Text>
-        </Animated.View>
+        </View>
       )}
-    </Animated.View>
+    </View>
   );
 };
 
@@ -135,11 +124,7 @@ export default function HelpFAQScreen() {
 
       {/* Search Bar */}
       <View style={tw`p-4 border-b border-[${colors.border}]`}>
-        <View style={tw`
-          flex-row items-center
-          bg-[${colors.surface}] rounded-xl
-          px-4 py-2
-        `}>
+        <View style={tw`flex-row items-center bg-[${colors.surface}] rounded-xl px-4 py-2`}>
           <Ionicons name="search" size={20} color={colors.text.light} />
           <TextInput
             style={tw`flex-1 ml-2 text-[${colors.text.primary}]`}
@@ -188,11 +173,7 @@ export default function HelpFAQScreen() {
           </Text>
           
           <TouchableOpacity
-            style={tw`
-              bg-[${colors.primary}] p-4 rounded-xl
-              flex-row items-center justify-center
-              ${isLoading ? 'opacity-50' : ''}
-            `}
+            style={tw`bg-[${colors.primary}] p-4 rounded-xl flex-row items-center justify-center ${isLoading ? 'opacity-50' : ''}`}
             onPress={handleContactSupport}
             disabled={isLoading}
           >
@@ -215,4 +196,4 @@ export default function HelpFAQScreen() {
       </ScrollView>
     </SafeAreaView>
   );
-} 
+}

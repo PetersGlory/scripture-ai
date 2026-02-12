@@ -89,7 +89,7 @@ export default function SignInScreen() {
         {/* Logo and Title */}
         <View style={tw`items-center mb-8`}>
           <Image
-            source={require('../assets/images/logo.jpeg')}
+            source={require('../assets/images/logo.png')}
             style={tw`w-20 h-20 mb-4 rounded-2xl`}
             resizeMode="contain"
           />

@@ -1,10 +1,12 @@
+import { PRIMARY_COLOR } from "./Colors";
+
 export const colors = {
-  primary: '#1A2238', // Dark navy blue from logo
+  primary: PRIMARY_COLOR, // Dark navy blue from logo
   secondary: '#FFB800', // Gold from cross
   background: '#FFFFFF',
   surface: '#F8F9FA',
   text: {
-    primary: '#1A2238',
+    primary: PRIMARY_COLOR,
     secondary: '#4A5568',
     light: '#718096'
   },

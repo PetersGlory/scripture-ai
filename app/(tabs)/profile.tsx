@@ -306,7 +306,7 @@ export default function ProfileScreen() {
 
       <View style={tw`p-4 items-center`}>
         <Text style={tw`text-[${colors.text.light}] text-sm`}>
-          Version 1.0.0
+          Version 1.0.1
         </Text>
       </View>
     </ScrollView>

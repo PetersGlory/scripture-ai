@@ -5,7 +5,6 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
 import { AuthProvider } from '../contexts/AuthContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ActivityIndicator, View } from 'react-native';
@@ -47,9 +46,9 @@ function RootLayoutNav() {
       </View>
     );
   }
-
+  console.log("User in RootLayoutNav:", user);
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false }} initialRouteName='index'>
       {user == null ? (
         <>
           <Stack.Screen name="sign-in" />
@@ -71,6 +70,8 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
+    }else{
+      SplashScreen.hideAsync();
     }
   }, [loaded]);
 
@@ -81,8 +82,16 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       {/* <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}> */}
-        <RootLayoutNav />
         <StatusBar style="dark" />
+        {/* <RootLayoutNav /> */}
+        <Stack screenOptions={{ headerShown: false }} initialRouteName='index'>
+          
+        <Stack.Screen name="index" />
+        <Stack.Screen name="sign-in" />
+        <Stack.Screen name="sign-up" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="help-faq" />
+        </Stack>
       {/* </ThemeProvider> */}
     </AuthProvider>
   );
