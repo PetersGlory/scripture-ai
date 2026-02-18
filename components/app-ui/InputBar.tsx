@@ -37,7 +37,7 @@ export const InputBar = ({
         >
           {/* Attach */}
           <TouchableOpacity style={tw`mr-3`}>
-            <Ionicons name="attach-outline" size={22} color="#9CA3AF" />
+            <Ionicons name="attach-outline" size={30} color="#9CA3AF" />
           </TouchableOpacity>
 
           {/* Text Input */}
@@ -57,11 +57,6 @@ export const InputBar = ({
             editable={!isLoading}
           />
 
-          {/* Emoji */}
-          <TouchableOpacity style={tw`ml-3`}>
-            <Ionicons name="happy-outline" size={22} color="#9CA3AF" />
-          </TouchableOpacity>
-
           {/* Send */}
           <TouchableOpacity
             onPress={onSend}
@@ -70,7 +65,7 @@ export const InputBar = ({
           >
             <Ionicons
               name="arrow-up-circle"
-              size={28}
+              size={30}
               color={
                 message.trim() && !isLoading
                   ? "#4A7C59"
