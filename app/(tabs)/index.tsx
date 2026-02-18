@@ -5,7 +5,7 @@ import {
   Text,
   ActivityIndicator,
   FlatList,
-  SafeAreaView,
+  KeyboardAvoidingView
 } from "react-native";
 import tw from "twrnc";
 import { useAuth } from "../../contexts/AuthContext";
@@ -18,6 +18,8 @@ import { Message, MessageBubble } from "@/components/app-ui/message-bouble";
 import { WelcomeIntro } from "@/components/app-ui/welcome";
 import { TypingIndicator } from "@/components/app-ui/typing-indicator";
 import { InputBar } from "@/components/app-ui/InputBar";
+import AppText from "@/components/ui/AppText";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 
 export default function HomeScreen() {
@@ -246,87 +248,89 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={tw`flex-1 py-4 bg-white`}>
-      {/* Header */}
-      <View style={tw`px-4 pt-5 pb-3 bg-white border-b border-gray-100`}>
-        <View style={tw`flex-row items-center justify-between`}>
-          <TouchableOpacity onPress={() => {
-            if(title){
-              setShowIntro(true)
-            }else{
-              router.back();
-            }
-          }}>
-            <Ionicons name="arrow-back" size={24} color="#1F2937" />
-          </TouchableOpacity>
-          
-          <Text style={tw`text-lg font-semibold text-gray-900`}>
-            {title || "Study with Scripture AI"}
-          </Text>
+    <SafeAreaView style={tw`flex-1 bg-white`}>
+      <KeyboardAvoidingView style={tw` w-full h-[100%] flex-1`}>
+        {/* Header */}
+        <View style={tw`px-4 pt-5 pb-3 bg-white border-b border-gray-100`}>
+          <View style={tw`flex-row items-center justify-between`}>
+            <TouchableOpacity onPress={() => {
+              if(title){
+                setShowIntro(true)
+              }else{
+                router.back();
+              }
+            }}>
+              <Ionicons name="arrow-back" size={24} color="#1F2937" />
+            </TouchableOpacity>
+            
+            <AppText style={tw`text-xs`}>
+              {title || "Study with Scripture AI"}
+            </AppText>
 
-          <TouchableOpacity
-            onPress={handleBookmark}
-            disabled={isLoading || authLoading || isBookmarking || !sessionId}
-          >
-            {isBookmarking ? (
-              <ActivityIndicator color="#4A7C59" size="small" />
-            ) : (
-              <Ionicons
-                name="ellipsis-vertical"
-                size={24}
-                color="#1F2937"
-              />
-            )}
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleBookmark}
+              disabled={isLoading || authLoading || isBookmarking || !sessionId}
+            >
+              {isBookmarking ? (
+                <ActivityIndicator color="#4A7C59" size="small" />
+              ) : (
+                <Ionicons
+                  name="ellipsis-vertical"
+                  size={24}
+                  color="#1F2937"
+                />
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
 
-      {/* Date Separator */}
-      {!showIntro && messages.length > 0 && (
-        <View style={tw`items-center py-4`}>
-          <Text style={tw`text-xs text-gray-500`}>
-            {new Date().toLocaleDateString()}
-          </Text>
-        </View>
-      )}
+        {/* Date Separator */}
+        {!showIntro && messages.length > 0 && (
+          <View style={tw`items-center py-4`}>
+            <AppText style={tw`text-xs text-gray-500`}>
+              {new Date().toLocaleDateString()}
+            </AppText>
+          </View>
+        )}
 
-      {showIntro ? (
-        <WelcomeIntro features={features} onSkip={()=>setShowIntro(false)} setMessage={setMessage} user={user} />
-      ) : (
-        <>
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            renderItem={({ item, index }) => (
-              <MessageBubble item={item} index={index} onRetry={handleRetry} />
-            )}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={tw`px-4 pt-2 pb-6`}
-            onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
-            onLayout={() => flatListRef.current?.scrollToEnd()}
-            showsVerticalScrollIndicator={false}
-          />
-          {isLoading && <TypingIndicator />}
-        </>
-      )}
+        {showIntro ? (
+          <WelcomeIntro features={features} onSkip={()=>setShowIntro(false)} setMessage={setMessage} user={user} />
+        ) : (
+          <>
+            <FlatList
+              ref={flatListRef}
+              data={messages}
+              renderItem={({ item, index }) => (
+                <MessageBubble item={item} index={index} onRetry={handleRetry} />
+              )}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={tw`px-4 pt-2 pb-6`}
+              onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+              onLayout={() => flatListRef.current?.scrollToEnd()}
+              showsVerticalScrollIndicator={false}
+            />
+            {isLoading && <TypingIndicator />}
+          </>
+        )}
 
-      <InputBar
-        message={message}
-        setMessage={setMessage}
-        onSend={handleSendMessage}
-        isLoading={isLoading}
-      />
-
-      {alert.visible && (
-        <CustomAlert
-          visible={alert.visible}
-          title={alert.title}
-          message={alert.message}
-          type={alert.type}
-          onClose={() => setAlert({ ...alert, visible: false })}
-          onConfirm={alert.onConfirm}
+        <InputBar
+          message={message}
+          setMessage={setMessage}
+          onSend={handleSendMessage}
+          isLoading={isLoading}
         />
-      )}
+
+        {alert.visible && (
+          <CustomAlert
+            visible={alert.visible}
+            title={alert.title}
+            message={alert.message}
+            type={alert.type}
+            onClose={() => setAlert({ ...alert, visible: false })}
+            onConfirm={alert.onConfirm}
+          />
+        )}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

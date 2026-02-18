@@ -15,6 +15,7 @@ import tw from 'twrnc';
 import { colors } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import CustomAlert from '../components/CustomAlert';
+import AppText from '@/components/ui/AppText';
 
 const MAX_MESSAGE_LENGTH = 1000;
 
@@ -97,21 +98,21 @@ export default function ContactUsScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
+        <AppText  style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
           Contact Us
-        </Text>
+        </AppText >
       </View>
 
       <ScrollView style={tw`flex-1`} contentContainerStyle={tw`p-4`}>
-        <Text style={tw`text-[${colors.text.secondary}] mb-6`}>
+        <AppText  style={tw`text-[${colors.text.secondary}] mb-6 text-xs`} italic>
           Have a question, suggestion, or feedback? We'd love to hear from you. Fill out the form below and we'll get back to you as soon as possible.
-        </Text>
+        </AppText >
 
         <View style={tw`space-y-4 mb-6`}>
           <View>
-            <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
+            <AppText  style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
               Subject
-            </Text>
+            </AppText >
             <TextInput
               style={tw`
                 bg-[${colors.surface}] p-4 rounded-xl
@@ -130,20 +131,20 @@ export default function ContactUsScreen() {
               editable={!loading}
             />
             {errors.subject && (
-              <Text style={tw`text-[${colors.error}] text-sm mt-1`}>
+              <AppText  style={tw`text-[${colors.error}] text-sm mt-1`}>
                 {errors.subject}
-              </Text>
+              </AppText >
             )}
           </View>
 
           <View>
             <View style={tw`flex-row justify-between items-center mb-2`}>
-              <Text style={tw`text-[${colors.text.secondary}] font-medium`}>
+              <AppText  style={tw`text-[${colors.text.secondary}] font-medium`}>
                 Message
-              </Text>
-              <Text style={tw`text-[${colors.text.light}] text-sm`}>
+              </AppText >
+              <AppText  style={tw`text-[${colors.text.light}] text-sm`}>
                 {message.length}/{MAX_MESSAGE_LENGTH}
-              </Text>
+              </AppText >
             </View>
             <TextInput
               style={tw`
@@ -167,9 +168,9 @@ export default function ContactUsScreen() {
               maxLength={MAX_MESSAGE_LENGTH}
             />
             {errors.message && (
-              <Text style={tw`text-[${colors.error}] text-sm mt-1`}>
+              <AppText  style={tw`text-[${colors.error}] text-sm mt-1`}>
                 {errors.message}
-              </Text>
+              </AppText >
             )}
           </View>
         </View>
@@ -185,24 +186,24 @@ export default function ContactUsScreen() {
           {loading ? (
             <View style={tw`flex-row items-center justify-center`}>
               <ActivityIndicator color="white" />
-              <Text style={tw`text-white font-semibold ml-2`}>
+              <AppText  style={tw`text-white font-semibold ml-2`}>
                 Sending...
-              </Text>
+              </AppText >
             </View>
           ) : (
-            <Text style={tw`text-white text-center font-semibold text-lg`}>
+            <AppText  style={tw`text-white text-center font-semibold text-lg`}>
               Send Message
-            </Text>
+            </AppText >
           )}
         </TouchableOpacity>
 
         <View style={tw`mt-8 items-center`}>
-          <Text style={tw`text-[${colors.text.secondary}] text-center mb-2`}>
+          <AppText  style={tw`text-[${colors.text.secondary}] text-center mb-2`}>
             Or reach out to us directly:
-          </Text>
-          <Text style={tw`text-[${colors.primary}] font-medium`}>
+          </AppText >
+          <AppText  style={tw`text-[${colors.primary}] font-medium`}>
             getscriptureai@gmail.com
-          </Text>
+          </AppText >
         </View>
       </ScrollView>
 

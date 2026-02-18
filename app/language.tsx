@@ -12,6 +12,7 @@ import { useRouter } from 'expo-router';
 import tw from 'twrnc';
 import { colors } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import AppText from '@/components/ui/AppText';
 
 // List of supported languages
 const languages = [
@@ -60,9 +61,9 @@ export default function LanguageScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
+        <AppText style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
           Language
-        </Text>
+        </AppText>
       </View>
 
       {/* Language List */}
@@ -77,12 +78,12 @@ export default function LanguageScreen() {
             onPress={() => handleSelectLanguage(language.code)}
             disabled={loading}
           >
-            <Text style={tw`
+            <AppText style={tw`
               flex-1 text-base
               ${selectedLanguage === language.code ? `text-[${colors.primary}] font-semibold` : `text-[${colors.text.primary}]`}
             `}>
               {language.name}
-            </Text>
+            </AppText>
             {selectedLanguage === language.code && (
               <Ionicons name="checkmark" size={24} color={colors.primary} />
             )}

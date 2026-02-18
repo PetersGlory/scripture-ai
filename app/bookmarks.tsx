@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AppText from '@/components/ui/AppText';
 
 type Bookmark = {
   id: string;
@@ -96,9 +97,9 @@ export default function BookmarksScreen() {
           onPress={() => handleViewBookmark(item)}
           style={tw`flex-1`}
         >
-          <Text style={tw`text-[${colors.primary}] font-semibold text-lg`}>
+          <AppText  style={tw`text-[${colors.primary}] font-semibold text-lg`}>
             {item.title}
-          </Text>
+          </AppText >
         </TouchableOpacity>
         <TouchableOpacity 
           onPress={() => handleDeleteBookmark(item.sessionId)}
@@ -107,12 +108,12 @@ export default function BookmarksScreen() {
           <Ionicons name="trash-outline" size={20} color={colors.error} />
         </TouchableOpacity>
       </View>
-      <Text style={tw`text-[${colors.text.primary}] mb-2`}>
+      <AppText  style={tw`text-[${colors.text.primary}] mb-2`}>
         {item.lastMessage.slice(0, 100)}...
-      </Text>
-      <Text style={tw`text-[${colors.text.light}] text-xs`}>
+      </AppText >
+      <AppText  style={tw`text-[${colors.text.light}] text-xs`}>
         Bookmarked on {new Date(item.createdAt).toLocaleDateString()}
-      </Text>
+      </AppText >
     </View>
   );
 
@@ -126,9 +127,9 @@ export default function BookmarksScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
+        <AppText  style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
           My Bookmarks
-        </Text>
+        </AppText >
       </View>
 
       <ScrollView style={tw`flex-1`}>
@@ -149,12 +150,12 @@ export default function BookmarksScreen() {
         ) : (
           <View style={tw`flex-1 justify-center items-center p-4`}>
             <Ionicons name="bookmark-outline" size={64} color={colors.text.light} />
-            <Text style={tw`text-[${colors.text.secondary}] text-center mt-4 text-lg`}>
+            <AppText  style={tw`text-[${colors.text.secondary}] text-center mt-4 text-lg`}>
               You haven't bookmarked any conversations yet
-            </Text>
-            <Text style={tw`text-[${colors.text.light}] text-center mt-2`}>
+            </AppText >
+            <AppText  style={tw`text-[${colors.text.light}] text-center mt-2`}>
               When you bookmark a conversation, it will appear here
-            </Text>
+            </AppText >
           </View>
         )}
       </ScrollView>

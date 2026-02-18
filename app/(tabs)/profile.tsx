@@ -18,6 +18,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { rateApp } from '../../utils/app-rating';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
+import AppText from '@/components/ui/AppText';
 
 type SettingsSectionProps = {
   title: string;
@@ -26,9 +27,9 @@ type SettingsSectionProps = {
 
 const SettingsSection = ({ title, children }: SettingsSectionProps) => (
   <View style={tw`mb-6`}>
-    <Text style={tw`text-[${colors.text.light}] text-sm mb-2 px-4`}>
+    <AppText  style={tw`text-[${colors.text.light}] text-sm mb-2 px-4`}>
       {title}
-    </Text>
+    </AppText >
     <View style={tw`bg-[${colors.surface}] rounded-2xl overflow-hidden`}>
       {children}
     </View>
@@ -77,12 +78,12 @@ const SettingsItem = ({
         color={danger ? colors.error : colors.primary}
       />
     </View>
-    <Text style={tw`
+    <AppText  style={tw`
       flex-1 ml-3 text-base
       ${danger ? `text-[${colors.error}]` : `text-[${colors.text.primary}]`}
     `}>
       {label}
-    </Text>
+    </AppText >
     {isSwitch ? (
       <Switch
         value={switchValue}
@@ -90,7 +91,7 @@ const SettingsItem = ({
         trackColor={{ false: colors.border, true: colors.primary }}
       />
     ) : value ? (
-      <Text style={tw`text-[${colors.text.light}]`}>{value}</Text>
+      <AppText  style={tw`text-[${colors.text.light}]`}>{value}</AppText >
     ) : onPress ? (
       <Ionicons
         name="chevron-forward"
@@ -161,9 +162,9 @@ export default function ProfileScreen() {
       <View style={tw`flex-1 justify-center items-center bg-[${colors.background}]`}>
         <View style={tw`items-center space-y-4`}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={tw`text-[${colors.text.secondary}]`}>
+          <AppText  style={tw`text-[${colors.text.secondary}]`}>
             Loading Please Wait...
-          </Text>
+          </AppText >
         </View>
       </View>
     );
@@ -176,9 +177,9 @@ export default function ProfileScreen() {
         flex-row items-center justify-between 
         px-4 py-4 border-b border-[${colors.border}]
       `}>
-        <Text style={tw`text-xl font-semibold text-[${colors.surface}]`}>
+        <AppText  style={tw`text-xl font-semibold text-[${colors.surface}]`}>
           Profile
-        </Text>
+        </AppText >
       </View>
       </BlurView>
       {/* Profile Header */}
@@ -199,12 +200,12 @@ export default function ProfileScreen() {
                 style={tw`w-24 h-24 rounded-full`}
               />
             ) : (
-              <Text style={tw`
+              <AppText  style={tw`
                 text-4xl font-bold
                 text-[${colors.primary}]
               `}>
                 {user?.name?.[0]?.toUpperCase() || 'U'}
-              </Text>
+              </AppText >
             )}
             <View style={tw`
               absolute right-0 bottom-0
@@ -216,12 +217,12 @@ export default function ProfileScreen() {
               <Ionicons name="camera" size={14} color="white" />
             </View>
           </TouchableOpacity>
-          <Text style={tw`text-xl font-semibold text-[${colors.text.primary}] text-center`}>
+          <AppText  style={tw`text-xl font-semibold text-[${colors.text.primary}] text-center`}>
             {user?.name || 'User'}
-          </Text>
-          <Text style={tw`text-[${colors.text.secondary}] text-center mt-1`}>
+          </AppText >
+          <AppText  style={tw`text-[${colors.text.secondary}] text-center mt-1`}>
             {user?.email}
-          </Text>
+          </AppText >
         </View>
       </View>
 
@@ -305,9 +306,9 @@ export default function ProfileScreen() {
       </SettingsSection>
 
       <View style={tw`p-4 items-center`}>
-        <Text style={tw`text-[${colors.text.light}] text-sm`}>
+        <AppText  style={tw`text-[${colors.text.light}] text-sm`}>
           Version 1.0.1
-        </Text>
+        </AppText >
       </View>
     </ScrollView>
   );

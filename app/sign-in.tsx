@@ -17,6 +17,7 @@ import { colors } from '../constants/theme';
 import { useAuth } from '../contexts/AuthContext';
 import CustomAlert from '../components/CustomAlert';
 import { Ionicons } from '@expo/vector-icons';
+import AppText from '@/components/ui/AppText';
 
 export default function SignInScreen() {
   const router = useRouter();
@@ -68,7 +69,7 @@ export default function SignInScreen() {
   };
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-white`}>
+    <SafeAreaView style={tw`flex-1 py-5 bg-white`}>
       <KeyboardAvoidingView
         style={tw`flex-1`}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -89,27 +90,27 @@ export default function SignInScreen() {
 
           {/* Logo and Title */}
           <View style={tw`items-center mb-12`}>
-            <View style={tw`w-24 h-24 rounded-3xl bg-[#4A7C59] items-center justify-center mb-6 shadow-lg`}>
+            <View style={tw`w-24 h-24 rounded-3xl items-center justify-center mb-6 relative`}>
               {/* Replace with your logo */}
-              {/* <Image source={require('../assets/images/logo.png')} style={tw`w-16 h-16`} resizeMode="contain" /> */}
-              <Text style={tw`text-5xl`}>✝️</Text>
+              <Image source={require('../assets/images/logo.png')} style={tw`w-24`} resizeMode="contain" />
+              {/* <AppText style={tw`text-5xl`}>✝️</AppText> */}
             </View>
             
-            <Text style={tw`text-3xl font-bold text-gray-900 mb-2`}>
+            <AppText style={tw`text-3xl text-gray-900 mb-2`} weight='bold'>
               Welcome Back
-            </Text>
-            <Text style={tw`text-gray-600 text-base`}>
+            </AppText>
+            <AppText style={tw`text-gray-600 text-sm`} italic>
               Sign in to continue your spiritual journey
-            </Text>
+            </AppText>
           </View>
 
           {/* Form */}
           <View style={tw`gap-5`}>
             {/* Email Input */}
             <View>
-              <Text style={tw`text-gray-700 mb-2 font-medium text-sm`}>
+              <AppText style={tw`text-gray-700 mb-2 font-medium text-sm`}>
                 Email Address
-              </Text>
+              </AppText>
               <View style={tw`flex-row items-center bg-gray-50 rounded-2xl px-4 border border-gray-200`}>
                 <Ionicons name="mail-outline" size={20} color="#9CA3AF" />
                 <TextInput
@@ -127,9 +128,9 @@ export default function SignInScreen() {
 
             {/* Password Input */}
             <View>
-              <Text style={tw`text-gray-700 mb-2 font-medium text-sm`}>
+              <AppText style={tw`text-gray-700 mb-2 font-medium text-sm`}>
                 Password
-              </Text>
+              </AppText>
               <View style={tw`flex-row items-center bg-gray-50 rounded-2xl px-4 border border-gray-200`}>
                 <Ionicons name="lock-closed-outline" size={20} color="#9CA3AF" />
                 <TextInput
@@ -156,9 +157,9 @@ export default function SignInScreen() {
 
             {/* Forgot Password */}
             <TouchableOpacity style={tw`self-end`}>
-              <Text style={tw`text-[#4A7C59] font-medium text-sm`}>
+              <AppText style={tw`text-[#4A7C59] font-medium text-sm`}>
                 Forgot Password?
-              </Text>
+              </AppText>
             </TouchableOpacity>
 
             {/* Sign In Button */}
@@ -170,58 +171,38 @@ export default function SignInScreen() {
               {loading ? (
                 <View style={tw`flex-row items-center justify-center`}>
                   <ActivityIndicator color="white" />
-                  <Text style={tw`text-white font-bold ml-2 text-base`}>
+                  <AppText style={tw`text-white ml-2 text-base`}>
                     Signing in...
-                  </Text>
+                  </AppText>
                 </View>
               ) : (
-                <Text style={tw`text-white text-center font-bold text-base`}>
+                <AppText style={tw`text-white text-center text-base`}>
                   Sign In
-                </Text>
+                </AppText>
               )}
             </TouchableOpacity>
 
             {/* Divider */}
             <View style={tw`flex-row items-center my-6`}>
               <View style={tw`flex-1 h-px bg-gray-200`} />
-              <Text style={tw`px-4 text-gray-500 text-sm`}>or</Text>
+              <AppText style={tw`px-4 text-gray-500 text-sm`}>or</AppText>
               <View style={tw`flex-1 h-px bg-gray-200`} />
             </View>
 
-            {/* Social Login Buttons */}
-            <View style={tw`gap-3`}>
-              <TouchableOpacity
-                style={tw`flex-row items-center justify-center bg-white border border-gray-200 py-3.5 rounded-2xl`}
-              >
-                <Ionicons name="logo-google" size={20} color="#DB4437" />
-                <Text style={tw`text-gray-700 font-semibold ml-2 text-base`}>
-                  Continue with Google
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={tw`flex-row items-center justify-center bg-white border border-gray-200 py-3.5 rounded-2xl`}
-              >
-                <Ionicons name="logo-apple" size={20} color="#000000" />
-                <Text style={tw`text-gray-700 font-semibold ml-2 text-base`}>
-                  Continue with Apple
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
 
           {/* Sign Up Link */}
-          <View style={tw`flex-row justify-center mt-8`}>
-            <Text style={tw`text-gray-600 text-base`}>
+          <View style={tw`flex-row justify-center mb-3`}>
+            <AppText style={tw`text-gray-600 text-base`}>
               Don't have an account?{' '}
-            </Text>
+            </AppText>
             <TouchableOpacity 
               onPress={() => router.push('/sign-up')}
               style={tw`active:opacity-60`}
             >
-              <Text style={tw`text-[#4A7C59] font-bold text-base`}>
+              <AppText style={tw`text-[#4A7C59] font-bold text-base`}>
                 Sign Up
-              </Text>
+              </AppText>
             </TouchableOpacity>
           </View>
         </ScrollView>

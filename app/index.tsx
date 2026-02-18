@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AppText from '@/components/ui/AppText';
 
 type OnboardingSlide = {
   id: number;
@@ -91,30 +92,30 @@ export default function WelcomeScreen() {
               <View style={tw`w-28 h-28 rounded-3xl items-center justify-center `}>
                 {/* If you have logo image, use this: */}
                 <Image source={require('../assets/images/logo.png')} style={tw`w-40 h-40`} resizeMode="contain" />
-                {/* <Text style={tw`text-6xl`}>✝️</Text> */}
+                {/* <AppText style={tw`text-6xl`}>✝️</AppText> */}
               </View>
             </View>
           </View>
 
-          <Text style={tw`text-3xl font-bold mb-2 text-gray-900 text-center`}>
+          <AppText style={tw`text-3xl mb-2 text-gray-900 text-center`} weight="bold">
             Welcome back,
-          </Text>
+          </AppText>
           
-          <Text style={tw`text-2xl font-bold mb-3 text-[#4A7C59] text-center`}>
+          <AppText style={tw`text-xl mb-3 text-[#4A7C59] text-center`}>
             {user.name}!
-          </Text>
+          </AppText>
           
-          <Text style={tw`text-gray-600 text-center text-base mb-12 max-w-[300px] leading-6`}>
+          <AppText style={tw`text-gray-600 text-center text-sm mb-12 max-w-[300px] leading-6`}>
             Continue your spiritual journey with Scripture AI
-          </Text>
+          </AppText>
 
           <TouchableOpacity 
             style={tw`bg-[#4A7C59] px-12 py-4 rounded-full flex-row items-center `}
             onPress={() => router.push('/(tabs)')}
           >
-            <Text style={tw`text-white text-lg font-semibold mr-2`}>
+            <AppText style={tw`text-white text-lg font-semibold mr-2`}>
               Continue to App
-            </Text>
+            </AppText>
             <Ionicons name="arrow-forward" size={20} color="white" />
           </TouchableOpacity>
         </View>
@@ -124,16 +125,16 @@ export default function WelcomeScreen() {
 
   // Onboarding Slides
   return (
-    <SafeAreaView style={tw`flex-1 bg-white`}>
+    <SafeAreaView style={tw`flex-1 py-5 bg-white`}>
       <StatusBar barStyle="dark-content" />
       
       {/* Skip Button */}
-      <View style={tw`absolute right-6 top-14 z-10`}>
+      <View style={tw`absolute right-6 top-10 z-10`}>
         <TouchableOpacity 
           style={tw`px-5 py-2 rounded-full bg-gray-100`}
           onPress={() => router.push('/sign-up')}
         >
-          <Text style={tw`text-gray-700 font-medium text-sm`}>Skip</Text>
+          <AppText style={tw`text-gray-700 font-medium text-sm`}>Skip</AppText>
         </TouchableOpacity>
       </View>
 
@@ -154,20 +155,20 @@ export default function WelcomeScreen() {
             <View style={tw`w-28 h-28 rounded-3xl items-center justify-center `}>
               {/* Replace with your logo: */}
               <Image source={require('../assets/images/logo.png')} style={tw`w-40 h-40`} resizeMode="contain" />
-              {/* <Text style={tw`text-6xl`}>{slides[currentSlide].icon}</Text> */}
+              {/* <AppText style={tw`text-6xl`}>{slides[currentSlide].icon}</AppText> */}
             </View>
           </View>
         </View>
 
         {/* Content */}
         <View style={tw`flex-1 items-center`}>
-          <Text style={tw`text-3xl font-bold text-center text-gray-900 mb-4 leading-tight`}>
+          <AppText style={tw`text-3xl text-center text-gray-900 mb-4 leading-tight`} weight='bold'>
             {slides[currentSlide].title}
-          </Text>
+          </AppText>
           
-          <Text style={tw`text-gray-600 text-center text-base mb-8 max-w-[320px] leading-6`}>
+          <AppText style={tw`text-gray-600 text-center text-sm mb-8 max-w-[320px] leading-6`} italic>
             {slides[currentSlide].subtitle}
-          </Text>
+          </AppText>
 
           {/* Feature List */}
           {slides[currentSlide].features && (
@@ -177,9 +178,9 @@ export default function WelcomeScreen() {
                   <View style={tw`w-6 h-6 rounded-full bg-[#4A7C59] items-center justify-center mr-3`}>
                     <Ionicons name="checkmark" size={16} color="white" />
                   </View>
-                  <Text style={tw`text-gray-700 text-sm flex-1`}>
+                  <AppText style={tw`text-gray-700 text-sm flex-1`}>
                     {feature}
-                  </Text>
+                  </AppText>
                 </View>
               ))}
             </View>
@@ -213,18 +214,18 @@ export default function WelcomeScreen() {
                 style={tw`bg-[#4A7C59] py-4 rounded-full items-center `}
                 onPress={() => router.push('/sign-up')}
               >
-                <Text style={tw`text-white text-base font-bold`}>
+                <AppText style={tw`text-white text-base`} weight='bold'>
                   Create Account
-                </Text>
+                </AppText>
               </TouchableOpacity>
               
               <TouchableOpacity 
                 style={tw`bg-gray-100 py-4 rounded-full items-center`}
                 onPress={() => router.push('/sign-in')}
               >
-                <Text style={tw`text-gray-700 text-base font-semibold`}>
+                <AppText style={tw`text-gray-700 text-base`} weight='bold'>
                   Sign In
-                </Text>
+                </AppText>
               </TouchableOpacity>
             </View>
           ) : (
@@ -248,9 +249,9 @@ export default function WelcomeScreen() {
                 style={tw`flex-1 bg-[#4A7C59] py-4 rounded-full items-center `}
                 onPress={() => setCurrentSlide(currentSlide + 1)}
               >
-                <Text style={tw`text-white text-base font-bold`}>
+                <AppText style={tw`text-white text-base`} weight='bold'>
                   Next
-                </Text>
+                </AppText>
               </TouchableOpacity>
             </View>
           )}

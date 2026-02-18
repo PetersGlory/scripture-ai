@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 import tw from 'twrnc';
 import { colors } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import AppText from '@/components/ui/AppText';
 
 const faqItems = [
   {
@@ -66,9 +67,9 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
         style={tw`p-4 flex-row items-center justify-between`}
         onPress={() => setExpanded(!expanded)}
       >
-        <Text style={tw`flex-1 text-[${colors.text.primary}] font-medium`}>
+        <AppText style={tw`flex-1 text-[${colors.text.primary}] font-medium`}>
           {question}
-        </Text>
+        </AppText>
         <Ionicons
           name={expanded ? 'chevron-up' : 'chevron-down'}
           size={20}
@@ -77,9 +78,9 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
       </TouchableOpacity>
       {expanded && (
         <View style={tw`px-4 pb-4`}>
-          <Text style={tw`text-[${colors.text.secondary}]`}>
+          <AppText style={tw`text-[${colors.text.secondary}]`}>
             {answer}
-          </Text>
+          </AppText>
         </View>
       )}
     </View>
@@ -108,7 +109,7 @@ export default function HelpFAQScreen() {
   };
 
   return (
-    <SafeAreaView style={tw`flex-1 pt-6 bg-[${colors.background}]`}>
+    <SafeAreaView style={tw`flex-1 py-6 bg-[${colors.background}]`}>
       {/* Header */}
       <View style={tw`flex-row items-center p-4 border-b border-[${colors.border}]`}>
         <TouchableOpacity 
@@ -117,9 +118,9 @@ export default function HelpFAQScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
+        <AppText style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
           Help & FAQ
-        </Text>
+        </AppText>
       </View>
 
       {/* Search Bar */}
@@ -144,9 +145,9 @@ export default function HelpFAQScreen() {
       <ScrollView style={tw`flex-1`}>
         {/* FAQ Section */}
         <View style={tw`p-4`}>
-          <Text style={tw`text-lg font-semibold text-[${colors.text.primary}] mb-4`}>
+          <AppText style={tw`text-lg font-semibold text-[${colors.text.primary}] mb-4`}>
             Frequently Asked Questions
-          </Text>
+          </AppText>
           
           {filteredFAQItems.length > 0 ? (
             filteredFAQItems.map((item, index) => (
@@ -159,18 +160,18 @@ export default function HelpFAQScreen() {
           ) : (
             <View style={tw`items-center py-8`}>
               <Ionicons name="search-outline" size={48} color={colors.text.light} />
-              <Text style={tw`text-[${colors.text.secondary}] mt-4 text-center`}>
+              <AppText style={tw`text-[${colors.text.secondary}] mt-4 text-center`}>
                 No results found for "{searchQuery}"
-              </Text>
+              </AppText>
             </View>
           )}
         </View>
 
         {/* Contact Support Section */}
         <View style={tw`p-4 mt-4`}>
-          <Text style={tw`text-lg font-semibold text-[${colors.text.primary}] mb-4`}>
+          <AppText style={tw`text-lg font-semibold text-[${colors.text.primary}] mb-4`}>
             Still Need Help?
-          </Text>
+          </AppText>
           
           <TouchableOpacity
             style={tw`bg-[${colors.primary}] p-4 rounded-xl flex-row items-center justify-center ${isLoading ? 'opacity-50' : ''}`}
@@ -182,16 +183,16 @@ export default function HelpFAQScreen() {
             ) : (
               <>
                 <Ionicons name="mail-outline" size={20} color="white" />
-                <Text style={tw`text-white font-semibold ml-2`}>
+                <AppText style={tw`text-white font-semibold ml-2`}>
                   Contact Support
-                </Text>
+                </AppText>
               </>
             )}
           </TouchableOpacity>
           
-          <Text style={tw`text-center text-[${colors.text.secondary}] mt-4`}>
+          <AppText style={tw`text-center text-[${colors.text.secondary}] mt-4`}>
             Our support team is available 24/7 to help you
-          </Text>
+          </AppText>
         </View>
       </ScrollView>
     </SafeAreaView>

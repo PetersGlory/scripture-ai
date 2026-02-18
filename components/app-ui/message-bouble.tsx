@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { View, TouchableOpacity, Text } from "react-native";
 import tw from "twrnc"
+import AppText from "../ui/AppText";
 
 export type Message = {
   id: string;
@@ -26,15 +27,15 @@ export const MessageBubble = React.memo(
       <View style={tw`mb-3 ${item.isUser ? "items-end" : "items-start"}`}>
         {item.isUser ? (
           <View style={tw`bg-[${PRIMARY_COLOR}] px-5 py-3 rounded-3xl rounded-tr-md max-w-[75%]`}>
-            <Text style={tw`text-white text-base leading-6`}>
+            <AppText style={tw`text-white text-xs leading-6`}>
               {item.text}
-            </Text>
-            <Text style={tw`text-white/60 text-xs mt-1 text-right`}>
+            </AppText>
+            <AppText style={tw`text-white/60 text-xs mt-1 text-right`}>
               {item.timestamp.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
-            </Text>
+            </AppText>
           </View>
         ) : (
           <View
@@ -44,13 +45,13 @@ export const MessageBubble = React.memo(
                 : "bg-gray-100"
             } px-5 py-3 rounded-3xl rounded-tl-md max-w-[85%]`}
           >
-            <Text
+            <AppText
               style={tw`${
                 item.error ? "text-red-700" : "text-gray-800"
-              } text-base leading-6`}
+              } text-xs leading-6`}
             >
               {item.text}
-            </Text>
+            </AppText>
 
             <View
               style={tw`flex-row items-center mt-1 ${
@@ -63,12 +64,12 @@ export const MessageBubble = React.memo(
                   style={tw`flex-row items-center bg-red-100 px-3 py-1 rounded-full`}
                 >
                   <Ionicons name="refresh" size={12} color="#dc2626" />
-                  <Text style={tw`text-xs text-red-600 ml-1 font-medium`}>
+                  <AppText style={tw`text-xs text-red-600 ml-1 font-medium`}>
                     Retry
-                  </Text>
+                  </AppText>
                 </TouchableOpacity>
               )}
-              <Text
+              <AppText
                 style={tw`text-xs ${
                   item.error ? "text-red-400" : "text-gray-500"
                 }`}
@@ -77,7 +78,7 @@ export const MessageBubble = React.memo(
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
-              </Text>
+              </AppText>
             </View>
           </View>
         )}

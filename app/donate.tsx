@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { BlurView } from "expo-blur";
 import { PRIMARY_COLOR } from "@/constants/Colors";
+import AppText from "@/components/ui/AppText";
 
 export default function DonateScreen() {
   const router = useRouter();
@@ -45,9 +46,9 @@ export default function DonateScreen() {
           <TouchableOpacity onPress={() => router.back()} style={tw`p-2`}>
             <Ionicons name="arrow-back" size={24} color={colors.surface} />
           </TouchableOpacity>
-          <Text style={tw`text-xl font-semibold text-[${colors.surface}]`}>
+          <AppText style={tw`text-base text-[${colors.surface}]`} weight="bold">
             Support Our Mission
-          </Text>
+          </AppText>
           <View style={tw`w-8`} />
         </View>
       </BlurView>
@@ -60,14 +61,15 @@ export default function DonateScreen() {
           >
             <Ionicons name="heart" size={48} color={colors.primary} />
           </View>
-          <Text
-            style={tw`text-2xl font-bold text-[${colors.text.primary}] text-center mb-2`}
+          <AppText 
+            style={tw`text-2xl text-[${colors.text.primary}] text-center mb-2`}
+            weight="bold"
           >
             Support Scripture AI
-          </Text>
-          <Text style={tw`text-[${colors.text.secondary}] text-center`}>
+          </AppText>
+          <AppText style={tw`text-[${colors.text.secondary}] text-xs text-center`}>
             Help us continue developing and improving this app
-          </Text>
+          </AppText>
         </View>
         <View style={tw`p-4`}>
           {/* Donation Options */}
@@ -82,14 +84,14 @@ export default function DonateScreen() {
                 <Ionicons name="cafe" size={24} color="white" />
               </View>
               <View style={tw`ml-4 flex-1`}>
-                <Text
-                  style={tw`text-lg font-semibold text-[${colors.text.primary}]`}
+                <AppText weight="bold"
+                  style={tw`text-lg text-[${colors.text.primary}]`}
                 >
                   Buy a Coffee
-                </Text>
-                <Text style={tw`text-[${colors.text.secondary}]`}>
+                </AppText>
+                <AppText style={tw`text-xs text-[${colors.text.secondary}]`}>
                   Support with a small donation
-                </Text>
+                </AppText>
               </View>
               <Ionicons
                 name="chevron-forward"
@@ -109,14 +111,14 @@ export default function DonateScreen() {
                 <Ionicons name="cash" size={24} color="white" />
               </View>
               <View style={tw`ml-4 flex-1`}>
-                <Text
-                  style={tw`text-lg font-semibold text-[${colors.text.primary}]`}
+                <AppText weight="bold"
+                  style={tw`text-lg text-[${colors.text.primary}]`}
                 >
                   Bank Transfer
-                </Text>
-                <Text style={tw`text-[${colors.text.secondary}]`}>
+                </AppText>
+                <AppText style={tw`text-xs text-[${colors.text.secondary}]`}>
                   Transfer directly to our bank account
-                </Text>
+                </AppText>
               </View>
               <Ionicons
                 name="chevron-forward"
@@ -127,36 +129,36 @@ export default function DonateScreen() {
           </View>
           {/* Benefits Section */}
           <View style={tw`mt-8 mb-6`}>
-            <Text
+            <AppText 
               style={tw`text-lg font-semibold text-[${colors.text.primary}] mb-4`}
             >
               Your Support Helps Us:
-            </Text>
+            </AppText>
             <View style={tw`space-y-3`}>
-              <View style={tw`flex-row items-start`}>
+              <View style={tw`flex-row items-center`}>
                 <Ionicons
                   name="checkmark-circle"
                   size={20}
                   color={colors.primary}
                   style={tw`mt-1`}
                 />
-                <Text style={tw`text-[${colors.text.secondary}] ml-2 flex-1`}>
+                <AppText style={tw`text-[${colors.text.secondary}] text-xs ml-2 flex-1`}>
                   Develop new features and improvements
-                </Text>
+                </AppText>
               </View>
             </View>
           </View>
 
           {/* Thank You Message */}
           <View style={tw`items-center mt-6 mb-8`}>
-            <Text style={tw`text-[${colors.text.secondary}] text-center`}>
+            <AppText style={tw`text-[${colors.text.secondary}] text-center text-sm`}>
               Thank you for being part of our journey! ❤️
-            </Text>
-            <Text
+            </AppText>
+            <AppText 
               style={tw`text-[${colors.text.secondary}] text-center mt-1 text-sm`}
             >
               Every contribution makes a difference
-            </Text>
+            </AppText>
           </View>
 
           {/* Bank Details Modal */}
@@ -170,22 +172,22 @@ export default function DonateScreen() {
               style={tw`flex-1 justify-center items-center bg-black bg-opacity-50`}
             >
               <View style={tw`bg-white rounded-lg p-6 w-80`}>
-                <Text style={tw`text-lg font-bold mb-4`}>
+                <AppText style={tw`text-lg mb-4`} italic weight="bold">
                   Bank Transfer Details
-                </Text>
-                <Text style={tw`mb-2`}>
+                </AppText>
+                <AppText style={tw`mb-2`}>
                   Account Name: {bankDetails.accountName}
-                </Text>
-                <Text style={tw`mb-2`}>
+                </AppText>
+                <AppText style={tw`mb-2`}>
                   Account Number: {bankDetails.accountNumber}
-                </Text>
-                <Text style={tw`mb-2`}>Bank Name: {bankDetails.bankName}</Text>
-                {/* <Text style={tw`mb-2`}>Sort Code: {bankDetails.sortCode}</Text> */}
+                </AppText>
+                <AppText style={tw`mb-2`}>Bank Name: {bankDetails.bankName}</AppText>
+                {/* <AppText style={tw`mb-2`}>Sort Code: {bankDetails.sortCode}</AppText> */}
                 <TouchableOpacity
                   style={tw`mt-4 bg-[${PRIMARY_COLOR}] rounded-lg p-2`}
                   onPress={() => setModalVisible(false)}
                 >
-                  <Text style={tw`text-white text-center`}>Close</Text>
+                  <AppText style={tw`text-white text-center`}>Close</AppText>
                 </TouchableOpacity>
               </View>
             </View>

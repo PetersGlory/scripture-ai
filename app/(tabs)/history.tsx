@@ -19,6 +19,7 @@ import { getSessions } from '../../services/api';
 import CustomAlert from '../../components/CustomAlert';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PRIMARY_COLOR } from '@/constants/Colors';
+import AppText from '@/components/ui/AppText';
 
 type ChatSession = {
   id: string;
@@ -97,16 +98,16 @@ export default function HistoryScreen() {
           <Ionicons name="chatbubbles-outline" size={20} color={colors.primary} />
         </View>
         <View style={tw`flex-1 mr-3`}>
-          <Text style={tw`text-base font-medium text-[${colors.text.primary}] mb-1`} numberOfLines={1}>
+          <AppText style={tw`text-sm text-[${colors.text.primary}] mb-1`} numberOfLines={1}>
             {item.title}
-          </Text>
+          </AppText>
           <View style={tw`flex-row justify-between items-center`}>
-            <Text style={tw`text-sm text-[${colors.text.secondary}] flex-1 mr-2`} numberOfLines={1}>
+            <AppText style={tw`text-xs text-[${colors.text.secondary}] flex-1 mr-2`} numberOfLines={1}>
               {item.lastMessage}
-            </Text>
-            <Text style={tw`text-xs text-[${colors.text.light}]`}>
+            </AppText>
+            <AppText style={tw`text-xs text-[${colors.text.light}]`}>
               {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
-            </Text>
+            </AppText>
           </View>
         </View>
         <Ionicons name="chevron-forward" size={20} color={colors.text.light} />
@@ -129,18 +130,18 @@ export default function HistoryScreen() {
         <View style={tw`w-16 h-16 rounded-full bg-[${colors.surface}] items-center justify-center mb-4`}>
           <Ionicons name="chatbubbles-outline" size={32} color={colors.text.light} />
         </View>
-        <Text style={tw`text-xl font-semibold text-[${colors.text.primary}] mb-2`}>
+        <AppText style={tw`text-xl font-semibold text-[${colors.text.primary}] mb-2`}>
           No Chat History
-        </Text>
-        <Text style={tw`text-center text-[${colors.text.secondary}] mb-6`}>
+        </AppText>
+        <AppText style={tw`text-center text-[${colors.text.secondary}] mb-6`}>
           Start a new conversation with Scripture AI
-        </Text>
+        </AppText>
         <TouchableOpacity
           style={tw`bg-[${colors.primary}] px-6 py-3 rounded-2xl flex-row items-center`}
           onPress={() => router.push('/(tabs)')}
         >
           <Ionicons name="add" size={20} color="white" style={tw`mr-2`} />
-          <Text style={tw`text-white font-semibold`}>Start New Chat</Text>
+          <AppText style={tw`text-white font-semibold`}>Start New Chat</AppText>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -151,9 +152,9 @@ export default function HistoryScreen() {
       {/* Header */}
       <View style={tw`px-4 pt-3 pb-3 bg-white border-b border-gray-200`}>
         <View style={tw`flex-row items-center justify-between`}>
-          <Text style={tw`text-xl font-bold text-gray-800`}>
+          <AppText style={tw`text-lg text-gray-800`} weight='bold'>
             Chat History
-          </Text>
+          </AppText>
           <TouchableOpacity 
             style={tw`w-10 h-10 rounded-full bg-blue-50 items-center justify-center`}
             onPress={() => router.push('/(tabs)')}
@@ -166,9 +167,9 @@ export default function HistoryScreen() {
       {loading && !refreshing ? (
         <View style={tw`flex-1 justify-center items-center p-4`}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={tw`mt-4 text-[${colors.text.secondary}]`}>
+          <AppText style={tw`mt-4 text-[${colors.text.secondary}]`}>
             Loading history...
-          </Text>
+          </AppText>
         </View>
       ) : sessions.length > 0 ? (
         <FlatList

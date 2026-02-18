@@ -7,7 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { AuthProvider } from '../contexts/AuthContext';
 import { useAuth } from '../contexts/AuthContext';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, View } from 'react-native';
 import tw from "twrnc"
 import { colors } from '@/constants/theme';
 import { Text } from 'react-native';
@@ -64,23 +64,25 @@ function RootLayoutNav() {
 export default function RootLayout() {
   // const colorScheme = useColorScheme();
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    SpaceMono_Regular: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    SpaceMono_Italic: require('../assets/fonts/SpaceMono-Italic.ttf'),
+    SpaceMono_Bold: require('../assets/fonts/SpaceMono-Bold.ttf'),
+    SpaceMono_BoldItalic: require('../assets/fonts/SpaceMono-BoldItalic.ttf'),
   });
+
 
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
-    }else{
-      SplashScreen.hideAsync();
     }
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
+
+  if (!loaded) return null;
 
   return (
     <AuthProvider>
+      {/* <KeyboardAvoidingView style={tw`flex-1 w-full`}> */}
       {/* <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}> */}
         <StatusBar style="dark" />
         {/* <RootLayoutNav /> */}
@@ -92,6 +94,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="help-faq" />
         </Stack>
+      {/* </KeyboardAvoidingView> */}
       {/* </ThemeProvider> */}
     </AuthProvider>
   );

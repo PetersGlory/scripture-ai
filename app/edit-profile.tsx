@@ -17,6 +17,7 @@ import { colors } from '../constants/theme';
 import { useAuth } from '../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import CustomAlert from '../components/CustomAlert';
+import AppText from '@/components/ui/AppText';
 
 export default function EditProfileScreen() {
   const router = useRouter();
@@ -134,9 +135,9 @@ export default function EditProfileScreen() {
             >
               <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
             </TouchableOpacity>
-            <Text style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
+            <AppText style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
               Edit Profile
-            </Text>
+            </AppText>
           </View>
 
           {/* Profile Photo */}
@@ -160,12 +161,12 @@ export default function EditProfileScreen() {
                   style={tw`w-24 h-24 rounded-full`}
                 />
               ) : (
-                <Text style={tw`
+                <AppText style={tw`
                   text-4xl font-bold
                   text-[${colors.primary}]
                 `}>
                   {name?.[0]?.toUpperCase() || 'U'}
-                </Text>
+                </AppText>
               )}
               <View style={tw`
                 absolute right-0 bottom-0
@@ -177,17 +178,17 @@ export default function EditProfileScreen() {
                 <Ionicons name="camera" size={14} color="white" />
               </View>
             </TouchableOpacity>
-            <Text style={tw`text-[${colors.text.secondary}]`}>
+            <AppText style={tw`text-[${colors.text.secondary}]`}>
               Tap to change photo
-            </Text>
+            </AppText>
           </View>
 
           {/* Form */}
           <View style={tw`space-y-4`}>
             <View>
-              <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
+              <AppText style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
                 Name
-              </Text>
+              </AppText>
               <TextInput
                 style={tw`
                   bg-[${colors.surface}] p-4 rounded-xl
@@ -206,16 +207,16 @@ export default function EditProfileScreen() {
                 editable={!loading}
               />
               {errors.name && (
-                <Text style={tw`text-[${colors.error}] text-sm mt-1`}>
+                <AppText style={tw`text-[${colors.error}] text-sm mt-1`}>
                   {errors.name}
-                </Text>
+                </AppText>
               )}
             </View>
 
             <View>
-              <Text style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
+              <AppText style={tw`text-[${colors.text.secondary}] mb-2 font-medium`}>
                 Email
-              </Text>
+              </AppText>
               <TextInput
                 style={tw`
                   bg-[${colors.surface}] p-4 rounded-xl
@@ -236,9 +237,9 @@ export default function EditProfileScreen() {
                 editable={!loading}
               />
               {errors.email && (
-                <Text style={tw`text-[${colors.error}] text-sm mt-1`}>
+                <AppText style={tw`text-[${colors.error}] text-sm mt-1`}>
                   {errors.email}
-                </Text>
+                </AppText>
               )}
             </View>
           </View>
@@ -255,14 +256,14 @@ export default function EditProfileScreen() {
             {loading ? (
               <View style={tw`flex-row items-center justify-center`}>
                 <ActivityIndicator color="white" />
-                <Text style={tw`text-white font-semibold ml-2`}>
+                <AppText style={tw`text-white font-semibold ml-2`}>
                   Saving...
-                </Text>
+                </AppText>
               </View>
             ) : (
-              <Text style={tw`text-white text-center font-semibold text-lg`}>
+              <AppText style={tw`text-white text-center font-semibold text-lg`}>
                 Save Changes
-              </Text>
+              </AppText>
             )}
           </TouchableOpacity>
         </View>

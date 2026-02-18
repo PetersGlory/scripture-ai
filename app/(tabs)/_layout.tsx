@@ -1,10 +1,11 @@
 import { router, Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, theme } from "../../constants/theme";
-import { Platform } from "react-native";
+import { KeyboardAvoidingView, Platform } from "react-native";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import tw from "twrnc"
 
 type TabBarIconProps = {
   color: string;
@@ -34,8 +35,8 @@ export function TabLayouts() {
           borderTopColor: colors.border,
           elevation: 0,
           shadowOpacity: 0,
-          height: Platform.OS === "ios" ? 88 : 60,
-          paddingBottom: Platform.OS === "ios" ? 28 : 8,
+          height: Platform.OS === "ios" ? 88 : 88,
+          marginBottom: Platform.OS === "ios" ? 28 : 0,
           paddingTop: 8,
         },
         headerStyle: {
@@ -105,7 +106,9 @@ export function TabLayouts() {
 export default function TabLayout() {
   return (
     <AuthProvider>
-      <TabLayouts />
+      {/* <KeyboardAvoidingView style={tw`flex-1 w-full`}> */}
+        <TabLayouts />
+      {/* </KeyboardAvoidingView> */}
     </AuthProvider>
   );
 }
