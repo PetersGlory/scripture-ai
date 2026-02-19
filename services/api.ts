@@ -67,6 +67,38 @@ export const chatService = {
   },
 };
 
+// Trivia
+
+export const triviaService = {
+  generateTriviaQuestions: async (
+    category: string,
+    difficulty: string,
+    count: number = 5
+  ) => {
+    try {
+      const response = await api.post(
+        `/trivia/generate`,
+        { category, difficulty, count },
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error generating trivia questions:', error);
+      throw error;
+    }
+  },
+  getTriviaCategories: async () => {
+    try {
+      const response = await api.get(`/trivia/categories`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching trivia categories:', error);
+      throw error;
+    }
+  }
+};
+
+
+// chat AI
 export const chatWithAi = async (data: { 
   message: string; 
   sessionId?: string; 
@@ -92,5 +124,118 @@ export const getChatMessages = async (sessionId: string, token: string) => {
     headers: { Authorization: `Bearer ${token}` }
   };
   const response = await api.get(`/chats/session/${sessionId}`, config);
+  return response.data;
+};
+
+
+// Acheivements/Badges
+export const getUserAchievements = async (token: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/achievements`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching achievements:', error);
+    throw error;
+  }
+};
+
+export const updateGameStats = async (
+  gameData: {
+    score: number;
+    questionsAnswered: number;
+    correctAnswers: number;
+    isPerfect: boolean;
+    longestStreak: number;
+  },
+  token: string
+) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/achievements/update-stats`,
+      gameData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error updating stats:', error);
+    throw error;
+  }
+};
+
+// services/api.ts
+
+export const getBibleBooks = async () => {
+  const response = await axios.get(`${API_URL}/bible/books`);
+  return response.data;
+};
+
+export const getBibleVersions = async () => {
+  const response = await axios.get(`${API_URL}/bible/versions`);
+  return response.data;
+};
+
+export const getBiblePassage = async (reference: string, version: string = 'kjv') => {
+  const response = await axios.get(`${API_URL}/bible/passage/${encodeURIComponent(reference)}`, {
+    params: { version }
+  });
+  return response.data;
+};
+
+export const getBibleChapter = async (book: string, chapter: number, version: string = 'kjv') => {
+  const response = await axios.get(`${API_URL}/bible/chapter/${book}/${chapter}`, {
+    params: { version }
+  });
+  console.log("this is the  resesponse: ", response.data)
+  return response.data;
+};
+
+export const getBookmarks = async (token: string) => {
+  const response = await axios.get(`${API_URL}/bible/bookmarks`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
+export const createBookmark = async (data: any, token: string) => {
+  const response = await axios.post(`${API_URL}/bible/bookmarks`, data, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
+export const deleteBookmark = async (id: number, token: string) => {
+  const response = await axios.delete(`${API_URL}/bible/bookmarks/${id}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
+export const getHighlights = async (token: string) => {
+  const response = await axios.get(`${API_URL}/bible/highlights`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
+export const createHighlight = async (data: any, token: string) => {
+  const response = await axios.post(`${API_URL}/bible/highlights`, data, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
+export const deleteHighlight = async (id: number, token: string) => {
+  const response = await axios.delete(`${API_URL}/bible/highlights/${id}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
   return response.data;
 };

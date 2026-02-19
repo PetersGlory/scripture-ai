@@ -245,13 +245,18 @@ export default function ProfileScreen() {
           switchValue={notifications}
           onSwitchChange={setNotifications}
         />
-        <SettingsItem
+        {/* <SettingsItem
           icon="moon"
           label="Dark Mode"
           isSwitch
           switchValue={darkMode}
           onSwitchChange={setDarkMode}
-          showBorder={false}
+          showBorder={true}
+        /> */}
+        <SettingsItem
+          icon="trophy"
+          label="Achievements"
+          onPress={()=>router.push('/achievements')}
         />
       </SettingsSection>
 

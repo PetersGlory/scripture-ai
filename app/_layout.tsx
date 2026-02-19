@@ -92,7 +92,9 @@ export default function RootLayout() {
         <Stack.Screen name="sign-in" />
         <Stack.Screen name="sign-up" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="games" />
         <Stack.Screen name="help-faq" />
+        <Stack.Screen name="bible" />
         </Stack>
       {/* </KeyboardAvoidingView> */}
       {/* </ThemeProvider> */}
