@@ -13,7 +13,6 @@ import tw from 'twrnc';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '@/components/ui/AppText';
 import { PRIMARY_COLOR } from '@/constants/Colors';
-import { useAuth } from '@/contexts/AuthContext';
 import { getUserAchievements } from '@/services/api';
 
 type Badge = {
@@ -66,8 +65,10 @@ const BadgeCard = ({ badge }: { badge: Badge }) => {
             <View style={[tw`px-2 py-0.5 rounded-full`, {
               backgroundColor: `${rarityColors[badge.rarity as keyof typeof rarityColors]}20`
             }]}>
-              <AppText style={tw`text-[10px]`} weight="bold" 
-                color={rarityColors[badge.rarity as keyof typeof rarityColors]}>
+              <AppText
+                style={[tw`text-[10px]`, { color: rarityColors[badge.rarity as keyof typeof rarityColors] }]}
+                weight="bold"
+              >
                 {badge.rarity.toUpperCase()}
               </AppText>
             </View>
@@ -128,7 +129,6 @@ const StatCard = ({ icon, label, value, color }: {
 );
 
 export default function AchievementsScreen() {
-  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [achievements, setAchievements] = useState<Badge[]>([]);
@@ -140,7 +140,7 @@ export default function AchievementsScreen() {
   const loadAchievements = async () => {
     try {
       setLoading(true);
-      const data = await getUserAchievements(user?.token || '');
+      const data = await getUserAchievements();
       setAchievements(data.achievements);
       setStats(data.stats);
       setTotalUnlocked(data.totalUnlocked);

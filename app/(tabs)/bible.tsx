@@ -64,10 +64,12 @@ const BookCard = ({
   <TouchableOpacity
     style={tw`bg-white rounded-2xl p-4 mb-3 border border-gray-200`}
     onPress={() => router.push({
-      pathname: '/bible/book' as never,
+      pathname: '/bible/book',
       params: { 
+        book: book.name,
         bookName: book.name, 
         bookAbbr: book.abbr, 
+        chapter: '1',
         chapters: book.chapters,
         testament 
       }
@@ -105,8 +107,8 @@ export default function BibleScreen() {
       const booksData = await getBibleBooks();
       setBooks(booksData.books);
 
-      if (user?.token) {
-        const bookmarksData = await getBookmarks(user.token);
+      if (user) {
+        const bookmarksData = await getBookmarks();
         setRecentBookmarks(bookmarksData.bookmarks?.slice(0, 3) || []);
       }
     } catch (error) {
@@ -141,7 +143,7 @@ export default function BibleScreen() {
           </View>
           <TouchableOpacity 
             style={tw`w-11 h-11 rounded-full bg-gray-100 items-center justify-center`}
-            onPress={() => router.push('/bible/search' as never)}
+            onPress={() => router.push('/bible/search')}
           >
             <Ionicons name="search-outline" size={22} color={PRIMARY_COLOR} />
           </TouchableOpacity>
@@ -160,14 +162,14 @@ export default function BibleScreen() {
             title="Bookmarks"
             description="Saved verses"
             color={PRIMARY_COLOR}
-            onPress={() => router.push('/bible/bookmarks' as never)}
+            onPress={() => router.push('/bible/bookmarks')}
           />
           <QuickActionCard
             icon="color-palette"
             title="Highlights"
             description="Marked verses"
             color="#F59E0B"
-            onPress={() => router.push('/bible/highlights' as never)}
+            onPress={() => router.push('/bible/highlights')}
           />
         </View>
 
@@ -175,7 +177,10 @@ export default function BibleScreen() {
         <TouchableOpacity 
           style={tw`mb-6`}
           activeOpacity={0.8}
-          onPress={() => router.push('/bible/verse-of-day' as never)}
+          onPress={() => router.push({
+            pathname: '/bible/book',
+            params: { book: 'John', bookName: 'John', bookAbbr: 'John', chapter: '3', testament: 'new' }
+          })}
         >
           <LinearGradient
             colors={[PRIMARY_COLOR, '#3A6347']}
@@ -203,7 +208,7 @@ export default function BibleScreen() {
               <AppText style={tw`text-gray-900 text-base`} weight="bold">
                 Recent Bookmarks
               </AppText>
-              <TouchableOpacity onPress={() => router.push('/bible/bookmarks' as never)}>
+              <TouchableOpacity onPress={() => router.push('/bible/bookmarks')}>
                 <AppText style={tw`text-[${PRIMARY_COLOR}] text-sm`} weight="regular">
                   View All
                 </AppText>
@@ -214,10 +219,11 @@ export default function BibleScreen() {
                 key={bookmark.id}
                 style={tw`bg-white rounded-2xl p-4 mb-2 border border-gray-200`}
                 onPress={() => router.push({
-                  pathname: '/bible/reader' as never,
+                  pathname: '/bible/book',
                   params: {
                     book: bookmark.book,
-                    chapter: bookmark.chapter,
+                    bookName: bookmark.book,
+                    chapter: String(bookmark.chapter),
                     verse: bookmark.verse
                   }
                 })}

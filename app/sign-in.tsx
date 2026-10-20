@@ -25,7 +25,7 @@ export default function SignInScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, clearError } = useAuth();
   const [alert, setAlert] = useState<{
     visible: boolean;
     title: string;
@@ -51,20 +51,18 @@ export default function SignInScreen() {
     }
 
     setLoading(true);
-    try {
-      const response = await signIn(email, password);
-      if(response){
-        router.replace('/(tabs)');
-      }
-    } catch (error) {
+    clearError();
+    const result = await signIn(email, password);
+    setLoading(false);
+    if (result.ok) {
+      router.replace('/(tabs)');
+    } else {
       setAlert({
         visible: true,
-        title: 'Error',
-        message: 'Failed to sign in. Please check your credentials.',
+        title: 'Sign In Failed',
+        message: result.error || 'Failed to sign in. Please check your credentials.',
         type: 'error',
       });
-    } finally {
-      setLoading(false);
     }
   };
 

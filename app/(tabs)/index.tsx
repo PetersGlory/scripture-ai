@@ -5,7 +5,8 @@ import {
   Text,
   ActivityIndicator,
   FlatList,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import tw from "twrnc";
 import { useAuth } from "../../contexts/AuthContext";
@@ -31,7 +32,7 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showIntro, setShowIntro] = useState(!routeSessionId);
   const [messages, setMessages] = useState<Message[]>([]);
-  const { user, signOut, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const flatListRef = useRef<FlatList>(null);
   const [sessionId, setSessionId] = useState<string | null>(
     routeSessionId || null
@@ -49,8 +50,6 @@ export default function HomeScreen() {
     message: "",
     type: "error",
   });
-
-  // console.log("this is the user", user)
 
   const features = [
     {
@@ -72,18 +71,18 @@ export default function HomeScreen() {
   ];
 
   useEffect(() => {
-    if (routeSessionId && user?.token) {
+    if (routeSessionId) {
       loadSessionMessages(routeSessionId as string);
       setShowIntro(false);
     } else {
       setShowIntro(true);
     }
-  }, [routeSessionId, user?.token]);
+  }, [routeSessionId]);
 
   const loadSessionMessages = async (sid: string) => {
     try {
       setIsLoading(true);
-      const data = await getChatMessages(sid, user?.token || "");
+      const data = await getChatMessages(sid);
 
       if (data && Array.isArray(data)) {
         const convertedMessages: Message[] = [];
@@ -184,21 +183,13 @@ export default function HomeScreen() {
     }
   };
 
-  const handleRetry = async (messageId: string) => {
-    const messageToRetry = messages.find((m) => m.id === messageId);
-    if (!messageToRetry || !messageToRetry.isUser) return;
-
-    setMessages((prev) => prev.filter((m) => m.id !== messageId));
-    setMessage(messageToRetry.text);
-    handleSendMessage();
-  };
-
-  const handleSendMessage = async () => {
-    if (!message.trim() || isLoading) return;
+  const sendText = async (rawText: string) => {
+    const trimmed = rawText.trim();
+    if (!trimmed || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: message.trim(),
+      text: trimmed,
       isUser: true,
       timestamp: new Date(),
     };
@@ -209,14 +200,10 @@ export default function HomeScreen() {
     setShowIntro(false);
 
     try {
-      const bodyData = {
-        message: userMessage.text,
+      const data = await chatWithAi({
+        message: trimmed,
         sessionId: sessionId || "",
-        context: {},
-      };
-
-      const response = await chatWithAi(bodyData, user?.token || "");
-      const data = await response;
+      });
 
       if (data.sessionId) {
         setSessionId(data.sessionId);
@@ -230,13 +217,11 @@ export default function HomeScreen() {
       };
 
       setMessages((prev) => [...prev, aiMessage]);
-    } catch (error: any) {
-      console.log(error.response?.data);
-      console.error("Error sending message:", error.message);
+    } catch (error) {
+      console.error("Error sending message:", error);
       const errorMessage: Message = {
         id: Date.now().toString() + "_error",
-        text:
-          "Sorry, there was an error processing your message. Please try again.",
+        text: "Sorry, there was an error processing your message. Please try again.",
         isUser: false,
         timestamp: new Date(),
         error: true,
@@ -247,9 +232,24 @@ export default function HomeScreen() {
     }
   };
 
+  const handleSendMessage = () => {
+    sendText(message);
+  };
+
+  const handleRetry = (messageId: string) => {
+    const messageToRetry = messages.find((m) => m.id === messageId);
+    if (!messageToRetry || !messageToRetry.isUser) return;
+    setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    setMessage("");
+    sendText(messageToRetry.text);
+  };
+
   return (
     <SafeAreaView style={tw`flex-1 bg-white`}>
-      <KeyboardAvoidingView style={tw` w-full h-[100%] flex-1`}>
+      <KeyboardAvoidingView
+        style={tw`flex-1`}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
         {/* Header */}
         <View style={tw`px-4 pt-5 pb-3 bg-white border-b border-gray-100`}>
           <View style={tw`flex-row items-center justify-between`}>
@@ -288,7 +288,7 @@ export default function HomeScreen() {
         {!showIntro && messages.length > 0 && (
           <View style={tw`items-center py-4`}>
             <AppText style={tw`text-xs text-gray-500`}>
-              {new Date().toLocaleDateString()}
+              {messages[0].timestamp.toLocaleDateString()}
             </AppText>
           </View>
         )}
@@ -305,6 +305,7 @@ export default function HomeScreen() {
               )}
               keyExtractor={(item) => item.id}
               contentContainerStyle={tw`px-4 pt-2 pb-6`}
+              keyboardShouldPersistTaps="handled"
               onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
               onLayout={() => flatListRef.current?.scrollToEnd()}
               showsVerticalScrollIndicator={false}

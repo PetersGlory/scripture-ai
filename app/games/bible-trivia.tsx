@@ -14,7 +14,6 @@ import { Ionicons } from '@expo/vector-icons';
 import AppText from '@/components/ui/AppText';
 import { PRIMARY_COLOR } from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAuth } from '@/contexts/AuthContext';
 import CustomAlert from '@/components/CustomAlert';
 import { triviaService, updateGameStats } from '@/services/api';
 
@@ -41,7 +40,6 @@ const CATEGORIES = [
 ];
 
 export default function BibleTriviaScreen() {
-  const { user } = useAuth();
   const [gameStarted, setGameStarted] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
@@ -63,39 +61,37 @@ export default function BibleTriviaScreen() {
     type: 'error' as 'error' | 'success' | 'warning' | 'info',
   });
     const [correctAnswers, setCorrectAnswers] = useState(0);
+    const [maxStreak, setMaxStreak] = useState(0);
     const [newAchievements, setNewAchievements] = useState<any[]>([]);
-    const [showAchievementModal, setShowAchievementModal] = useState(false);
 
-
-
-  // Timer effect
+  // Timer effect: decrement only; timeout handled in a separate effect
+  // so side effects never run inside a setState updater.
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (timerActive && timeLeft > 0 && !showExplanation) {
       interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            handleTimeout();
-            return 0;
-          }
-          return prev - 1;
-        });
+        setTimeLeft((prev) => Math.max(prev - 1, 0));
       }, 1000);
     }
     return () => clearInterval(interval);
   }, [timerActive, timeLeft, showExplanation]);
 
+  useEffect(() => {
+    if (timerActive && timeLeft === 0 && !showExplanation) {
+      handleTimeout();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft, timerActive, showExplanation]);
+
   const handleTimeout = () => {
     setTimerActive(false);
-    setLives(prev => {
-    const newLives = prev - 1;
-        if (newLives <= 0) {
-            endGame();
-        }
-        return newLives;
-    });
-
+    const newLives = lives - 1;
+    setLives(Math.max(newLives, 0));
     setStreak(0);
+    if (newLives <= 0) {
+      endGame(0);
+      return;
+    }
     setShowExplanation(true);
   };
 
@@ -110,6 +106,11 @@ export default function BibleTriviaScreen() {
       setScore(0);
       setLives(3);
       setStreak(0);
+      setMaxStreak(0);
+      setCorrectAnswers(0);
+      setSelectedAnswer(null);
+      setShowExplanation(false);
+      setGameOver(false);
       setTimeLeft(30);
       setTimerActive(true);
     } catch (error) {
@@ -182,36 +183,37 @@ export default function BibleTriviaScreen() {
             difficulty: 'medium',
         },
         ];
-        throw new Error('Failed to generate questions. Please try again.');
     }
   };
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (selectedAnswer !== null || showExplanation) return;
-    
+
     setSelectedAnswer(answerIndex);
     setTimerActive(false);
-    
+
     const currentQuestion = questions[currentQuestionIndex];
     const isCorrect = answerIndex === currentQuestion.correctAnswer;
-    
+
     if (isCorrect) {
       const points = difficulty === 'easy' ? 10 : difficulty === 'medium' ? 20 : 30;
       const streakBonus = streak * 5;
       setScore(score + points + streakBonus);
-      setStreak(streak + 1);
-      setCorrectAnswers(prev => prev + 1);
-
+      const nextStreak = streak + 1;
+      setStreak(nextStreak);
+      setMaxStreak((prev) => Math.max(prev, nextStreak));
+      setCorrectAnswers((prev) => prev + 1);
+      setShowExplanation(true);
     } else {
-      setLives(lives - 1);
+      const newLives = lives - 1;
+      setLives(Math.max(newLives, 0));
       setStreak(0);
-      if (lives <= 1) {
-        endGame();
+      if (newLives <= 0) {
+        endGame(0);
         return;
       }
+      setShowExplanation(true);
     }
-    
-    setShowExplanation(true);
   };
 
   const handleNextQuestion = () => {
@@ -222,39 +224,33 @@ export default function BibleTriviaScreen() {
       setTimeLeft(30);
       setTimerActive(true);
     } else {
-      endGame();
+      endGame(lives);
     }
   };
 
-  const endGame = async () => {
+  const endGame = async (finalLives: number) => {
     setTimerActive(false);
     setGameOver(true);
 
     const questionsAnswered = currentQuestionIndex + 1;
-    const isPerfect = lives === 3 && correctAnswers === questions.length;
+    const isPerfect = finalLives === 3 && correctAnswers === questions.length;
 
     try {
-        const result = await updateGameStats(
-        {
-            score,
-            questionsAnswered,
-            correctAnswers,
-            isPerfect,
-            longestStreak: streak
-        },
-        user?.token || ''
-        );
+      const result = await updateGameStats({
+        score,
+        questionsAnswered,
+        correctAnswers,
+        isPerfect,
+        longestStreak: maxStreak,
+      });
 
-        if (result?.newAchievements?.length > 0) {
+      if (result?.newAchievements?.length > 0) {
         setNewAchievements(result.newAchievements);
-        setShowAchievementModal(true);
-        }
-
+      }
     } catch (error) {
-        console.error('Error updating stats:', error);
+      console.error('Error updating stats:', error);
     }
-    };
-
+  };
 
   const resetGame = () => {
     setGameStarted(false);
@@ -264,6 +260,8 @@ export default function BibleTriviaScreen() {
     setScore(0);
     setLives(3);
     setStreak(0);
+    setMaxStreak(0);
+    setCorrectAnswers(0);
     setShowExplanation(false);
     setTimeLeft(30);
     setTimerActive(false);
@@ -405,7 +403,9 @@ export default function BibleTriviaScreen() {
 
   // Game Over Screen
   if (gameOver) {
-    const percentage = Math.round((score / (questions.length * 30)) * 100);
+    const percentage = questions.length > 0
+      ? Math.round((correctAnswers / questions.length) * 100)
+      : 0;
     
     return (
       <SafeAreaView style={tw`flex-1 py-4 bg-gray-50`}>
@@ -439,7 +439,7 @@ export default function BibleTriviaScreen() {
               <View style={tw`flex-row items-center justify-between`}>
                 <AppText style={tw`text-gray-600`}>Questions Answered</AppText>
                 <AppText style={tw`text-gray-900`} weight="bold">
-                  {currentQuestionIndex + 1} / {questions.length}
+                  {correctAnswers} / {questions.length}
                 </AppText>
               </View>
 
@@ -453,11 +453,28 @@ export default function BibleTriviaScreen() {
               <View style={tw`flex-row items-center justify-between`}>
                 <AppText style={tw`text-gray-600`}>Best Streak</AppText>
                 <AppText style={tw`text-gray-900`} weight="bold">
-                  {streak} 🔥
+                  {maxStreak} 🔥
                 </AppText>
               </View>
             </View>
           </View>
+
+          {/* New Achievements */}
+          {newAchievements.length > 0 && (
+            <View style={tw`w-full bg-white rounded-3xl p-6 mb-6 border border-gray-200`}>
+              <AppText style={tw`text-gray-900 mb-3`} weight="bold">
+                New Achievements Unlocked!
+              </AppText>
+              {newAchievements.map((achievement: any, index: number) => (
+                <View key={index} style={tw`flex-row items-center mb-2`}>
+                  <Ionicons name="trophy" size={18} color="#F59E0B" style={tw`mr-2`} />
+                  <AppText style={tw`text-gray-700 flex-1`}>
+                    {achievement.name || achievement.title || 'Achievement'}
+                  </AppText>
+                </View>
+              ))}
+            </View>
+          )}
 
           {/* Action Buttons */}
           <View style={tw`w-full gap-3`}>

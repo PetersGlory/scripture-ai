@@ -17,7 +17,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { getSessions } from '../../services/api';
 import CustomAlert from '../../components/CustomAlert';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PRIMARY_COLOR } from '@/constants/Colors';
 import AppText from '@/components/ui/AppText';
 
@@ -29,8 +28,48 @@ type ChatSession = {
   createdAt: string;
 };
 
+function EmptyState({
+  refreshing,
+  onRefresh,
+}: {
+  refreshing: boolean;
+  onRefresh: () => void;
+}) {
+  return (
+    <ScrollView
+      style={tw`flex-1 p-8`}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={colors.primary}
+        />
+      }
+    >
+      <View style={tw`items-center justify-center`}>
+        <View style={tw`w-16 h-16 rounded-full bg-[${colors.surface}] items-center justify-center mb-4`}>
+          <Ionicons name="chatbubbles-outline" size={32} color={colors.text.light} />
+        </View>
+        <AppText style={tw`text-xl font-semibold text-[${colors.text.primary}] mb-2`}>
+          No Chat History
+        </AppText>
+        <AppText style={tw`text-center text-[${colors.text.secondary}] mb-6`}>
+          Start a new conversation with Scripture AI
+        </AppText>
+        <TouchableOpacity
+          style={tw`bg-[${colors.primary}] px-6 py-3 rounded-2xl flex-row items-center`}
+          onPress={() => router.push('/(tabs)')}
+        >
+          <Ionicons name="add" size={20} color="white" style={tw`mr-2`} />
+          <AppText style={tw`text-white font-semibold`}>Start New Chat</AppText>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+}
+
 export default function HistoryScreen() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -48,10 +87,8 @@ export default function HistoryScreen() {
 
   const loadHistory = async () => {
     try {
-      if (!user?.token) return;
       setLoading(true);
-      
-      const data = await getSessions(user.token);
+      const data = await getSessions();
       if (Array.isArray(data)) {
         setSessions(data);
       }
@@ -64,8 +101,8 @@ export default function HistoryScreen() {
         type: 'error',
       });
       if (error.response?.status === 401) {
-        AsyncStorage.clear();
-        router.push('/sign-in');
+        await signOut();
+        router.replace('/sign-in');
       }
     } finally {
       setLoading(false);
@@ -75,7 +112,7 @@ export default function HistoryScreen() {
 
   useEffect(() => {
     loadHistory();
-  }, [user?.token]);
+  }, [user?.id]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -113,38 +150,6 @@ export default function HistoryScreen() {
         <Ionicons name="chevron-forward" size={20} color={colors.text.light} />
       </TouchableOpacity>
     </View>
-  );
-
-  const EmptyState = () => (
-    <ScrollView 
-      style={tw`flex-1 p-8`}
-      refreshControl={
-        <RefreshControl 
-          refreshing={refreshing} 
-          onRefresh={onRefresh}
-          tintColor={colors.primary}
-        />
-      }
-    >
-      <View style={tw`items-center justify-center`}>
-        <View style={tw`w-16 h-16 rounded-full bg-[${colors.surface}] items-center justify-center mb-4`}>
-          <Ionicons name="chatbubbles-outline" size={32} color={colors.text.light} />
-        </View>
-        <AppText style={tw`text-xl font-semibold text-[${colors.text.primary}] mb-2`}>
-          No Chat History
-        </AppText>
-        <AppText style={tw`text-center text-[${colors.text.secondary}] mb-6`}>
-          Start a new conversation with Scripture AI
-        </AppText>
-        <TouchableOpacity
-          style={tw`bg-[${colors.primary}] px-6 py-3 rounded-2xl flex-row items-center`}
-          onPress={() => router.push('/(tabs)')}
-        >
-          <Ionicons name="add" size={20} color="white" style={tw`mr-2`} />
-          <AppText style={tw`text-white font-semibold`}>Start New Chat</AppText>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
   );
 
   return (
@@ -187,7 +192,7 @@ export default function HistoryScreen() {
           }
         />
       ) : (
-        <EmptyState />
+        <EmptyState refreshing={refreshing} onRefresh={onRefresh} />
       )}
 
       <CustomAlert

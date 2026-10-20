@@ -14,7 +14,6 @@ import tw from 'twrnc';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '@/components/ui/AppText';
 import { PRIMARY_COLOR } from '@/constants/Colors';
-import { useAuth } from '@/contexts/AuthContext';
 import { getBibleChapter, createBookmark, createHighlight } from '@/services/api';
 import CustomAlert from '@/components/CustomAlert';
 
@@ -35,9 +34,10 @@ const HIGHLIGHT_COLORS = [
 ];
 
 export default function BibleReaderScreen() {
-  const { user } = useAuth();
   const params = useLocalSearchParams();
-  const { book, bookAbbr, chapter, testament } = params;
+  const { bookAbbr, chapter, testament } = params;
+  const bookTitle = (params.book as string) || (params.bookName as string) || '';
+  const totalChapters = params.chapters ? parseInt(params.chapters as string, 10) : undefined;
 
   const [loading, setLoading] = useState(true);
   const [verses, setVerses] = useState<Verse[]>([]);
@@ -59,18 +59,49 @@ export default function BibleReaderScreen() {
 
   useEffect(() => {
     loadChapter();
-  }, [book, chapter, version]);
+  }, [bookTitle, bookAbbr, chapter, version]);
+
+  const goBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)/bible');
+    }
+  };
 
   const loadChapter = async () => {
-    console.log("loading...")
+    const chapterNum = parseInt(chapter as string, 10);
+    if (!bookTitle && !bookAbbr) {
+      setAlert({
+        visible: true,
+        title: 'Error',
+        message: 'No book selected. Please pick a book from the Bible tab.',
+        type: 'error',
+      });
+      setLoading(false);
+      return;
+    }
+    if (!Number.isInteger(chapterNum) || chapterNum < 1) {
+      setAlert({
+        visible: true,
+        title: 'Error',
+        message: 'Invalid chapter. Please pick a book from the Bible tab.',
+        type: 'error',
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      const data = await getBibleChapter(bookAbbr as string, parseInt(chapter as string), version);
-
-      console.log("loaded data: ", data)
+      const data = await getBibleChapter(
+        (bookAbbr as string) || bookTitle,
+        chapterNum,
+        version
+      );
       setVerses(data.chapter.verses);
-    } catch (error) {
-      console.error('Error loading chapter:', error.response.data);
+    } catch (error: any) {
+      console.error('Error loading chapter:', error?.response?.data ?? error?.message);
       setAlert({
         visible: true,
         title: 'Error',
@@ -91,16 +122,13 @@ export default function BibleReaderScreen() {
     if (!selectedVerse) return;
 
     try {
-      await createBookmark(
-        {
-          book: book,
-          chapter: selectedVerse.chapter,
-          verse: selectedVerse.verse,
-          version,
-          note: bookmarkNote,
-        },
-        user?.token || ''
-      );
+      await createBookmark({
+        book: bookTitle,
+        chapter: selectedVerse.chapter,
+        verse: selectedVerse.verse,
+        version,
+        note: bookmarkNote,
+      });
 
       setAlert({
         visible: true,
@@ -124,18 +152,15 @@ export default function BibleReaderScreen() {
     if (!selectedVerse) return;
 
     try {
-      await createHighlight(
-        {
-          book: book,
-          chapter: selectedVerse.chapter,
-          verse: selectedVerse.verse,
-          text: selectedVerse.text,
-          color: selectedColor,
-          version,
-          note: highlightNote,
-        },
-        user?.token || ''
-      );
+      await createHighlight({
+        book: bookTitle,
+        chapter: selectedVerse.chapter,
+        verse: selectedVerse.verse,
+        text: selectedVerse.text,
+        color: selectedColor,
+        version,
+        note: highlightNote,
+      });
 
       setAlert({
         visible: true,
@@ -163,7 +188,17 @@ export default function BibleReaderScreen() {
   };
 
   const goToNextChapter = () => {
-    router.setParams({ chapter: (parseInt(chapter as string) + 1).toString() });
+    const nextChapter = parseInt(chapter as string) + 1;
+    if (totalChapters && nextChapter > totalChapters) {
+      setAlert({
+        visible: true,
+        title: 'End of book',
+        message: `${bookTitle} has ${totalChapters} chapter${totalChapters === 1 ? '' : 's'}.`,
+        type: 'info',
+      });
+      return;
+    }
+    router.setParams({ chapter: nextChapter.toString() });
   };
 
   if (loading) {
@@ -181,13 +216,13 @@ export default function BibleReaderScreen() {
       {/* Header */}
       <View style={tw`px-6 pt-6 pb-4 border-b border-gray-200`}>
         <View style={tw`flex-row items-center justify-between`}>
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity onPress={goBack} accessibilityRole="button" accessibilityLabel="Go back">
             <Ionicons name="arrow-back" size={24} color="#1F2937" />
           </TouchableOpacity>
 
           <View style={tw`flex-1 mx-4`}>
             <AppText style={tw`text-gray-900 text-lg text-center`} weight="bold">
-              {book} {chapter}
+              {bookTitle} {chapter}
             </AppText>
             <AppText style={tw`text-gray-600 text-xs text-center`}>
               {version.toUpperCase()}
@@ -279,7 +314,7 @@ export default function BibleReaderScreen() {
         >
           <View style={tw`bg-white rounded-t-3xl p-6`}>
             <AppText style={tw`text-gray-900 text-lg mb-4`} weight="bold">
-              {book} {selectedVerse?.chapter}:{selectedVerse?.verse}
+              {bookTitle} {selectedVerse?.chapter}:{selectedVerse?.verse}
             </AppText>
 
             <TouchableOpacity

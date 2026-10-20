@@ -21,7 +21,7 @@ import AppText from '@/components/ui/AppText';
 
 export default function SignUpScreen() {
   const router = useRouter();
-  const { signUp } = useAuth();
+  const { signUp, clearError } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -74,27 +74,24 @@ export default function SignUpScreen() {
     }
 
     setLoading(true);
-    try {
-      const response = await signUp(email, password, name);
-
-      if(response){
-        setAlert({
-          visible: true,
-          title: 'Success',
-          message: 'Account created successfully!',
-          type: 'success',
-          onConfirm: () => router.replace('/(tabs)'),
-        });
-      }
-    } catch (error) {
+    clearError();
+    const result = await signUp(email, password, name);
+    setLoading(false);
+    if (result.ok) {
       setAlert({
         visible: true,
-        title: 'Error',
-        message: 'Failed to create account. Please try again.',
+        title: 'Success',
+        message: 'Account created successfully!',
+        type: 'success',
+        onConfirm: () => router.replace('/(tabs)'),
+      });
+    } else {
+      setAlert({
+        visible: true,
+        title: 'Sign Up Failed',
+        message: result.error || 'Failed to create account. Please try again.',
         type: 'error',
       });
-    } finally {
-      setLoading(false);
     }
   };
 

@@ -13,31 +13,30 @@ export type Message = {
   error?: boolean;
 };
 
-export const MessageBubble = React.memo(
-  ({
-    item,
-    index,
-    onRetry,
-  }: {
-    item: Message;
-    index: number;
-    onRetry: (id: string) => void;
-  }) => {
-    return (
-      <View style={tw`mb-3 ${item.isUser ? "items-end" : "items-start"}`}>
-        {item.isUser ? (
-          <View style={tw`bg-[${PRIMARY_COLOR}] px-5 py-3 rounded-3xl rounded-tr-md max-w-[75%]`}>
-            <AppText style={tw`text-white text-xs leading-6`}>
-              {item.text}
-            </AppText>
-            <AppText style={tw`text-white/60 text-xs mt-1 text-right`}>
-              {item.timestamp.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </AppText>
-          </View>
-        ) : (
+function MessageBubbleInner({
+  item,
+  index,
+  onRetry,
+}: {
+  item: Message;
+  index: number;
+  onRetry: (id: string) => void;
+}) {
+  return (
+    <View style={tw`mb-3 ${item.isUser ? "items-end" : "items-start"}`}>
+      {item.isUser ? (
+        <View style={tw`bg-[${PRIMARY_COLOR}] px-5 py-3 rounded-3xl rounded-tr-md max-w-[75%]`}>
+          <AppText style={tw`text-white text-xs leading-6`}>
+            {item.text}
+          </AppText>
+          <AppText style={tw`text-white/60 text-xs mt-1 text-right`}>
+            {item.timestamp.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </AppText>
+        </View>
+      ) : (
           <View
             style={tw`${
               item.error
@@ -83,6 +82,7 @@ export const MessageBubble = React.memo(
           </View>
         )}
       </View>
-    );
-  }
-);
+  );
+}
+
+export const MessageBubble = React.memo(MessageBubbleInner);

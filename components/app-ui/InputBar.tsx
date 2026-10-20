@@ -1,7 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import {
-  KeyboardAvoidingView,
-  Platform,
   TextInput,
   TouchableOpacity,
   View,
@@ -20,11 +18,7 @@ export const InputBar = ({
   isLoading: boolean;
 }) => {
   return (
-    // <KeyboardAvoidingView
-    //   behavior={Platform.OS === "ios" ? "padding" : "height"}
-    //   keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 30}
-    // >
-      <View style={tw`px-4 pt-2 bg-white`}>
+    <View style={tw`px-4 pt-2 bg-white`}>
         <View
           style={tw`
             flex-row 
@@ -75,6 +69,5 @@ export const InputBar = ({
           </TouchableOpacity>
         </View>
       </View>
-    // </KeyboardAvoidingView>
   );
 };

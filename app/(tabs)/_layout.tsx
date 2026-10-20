@@ -1,31 +1,15 @@
-import { router, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, theme } from "../../constants/theme";
-import { KeyboardAvoidingView, Platform } from "react-native";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import tw from "twrnc"
+import { ColorValue, Platform } from "react-native";
 
 type TabBarIconProps = {
-  color: string;
+  color: ColorValue;
   size: number;
   focused: boolean;
 };
 
 export function TabLayouts() {
-  const { setUserData } = useAuth();
-  useEffect(() => {
-    const checkIsAuth = async () => {
-      const user = await AsyncStorage.getItem('user');
-      if (!user) {
-        setUserData(null);
-        router.replace('/sign-in');
-      }
-    };
-    checkIsAuth();
-  }, []);
-  
   return (
     <Tabs
       screenOptions={{
@@ -131,9 +115,5 @@ export function TabLayouts() {
 }
 
 export default function TabLayout() {
-  return (
-    <AuthProvider>
-      <TabLayouts />
-    </AuthProvider>
-  );
+  return <TabLayouts />;
 }

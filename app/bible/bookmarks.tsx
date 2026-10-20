@@ -13,12 +13,10 @@ import tw from 'twrnc';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '@/components/ui/AppText';
 import { PRIMARY_COLOR } from '@/constants/Colors';
-import { useAuth } from '@/contexts/AuthContext';
 import { getBookmarks, deleteBookmark } from '@/services/api';
 import CustomAlert from '@/components/CustomAlert';
 
 export default function BookmarksScreen() {
-  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [bookmarks, setBookmarks] = useState([]);
@@ -36,10 +34,16 @@ export default function BookmarksScreen() {
   const loadBookmarks = async () => {
     try {
       setLoading(true);
-      const data = await getBookmarks(user?.token || '');
+      const data = await getBookmarks();
       setBookmarks(data.bookmarks || []);
     } catch (error) {
       console.error('Error loading bookmarks:', error);
+      setAlert({
+        visible: true,
+        title: 'Error',
+        message: 'Failed to load bookmarks. Please try again.',
+        type: 'error',
+      });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -48,7 +52,7 @@ export default function BookmarksScreen() {
 
   const handleDelete = async (id: number) => {
     try {
-      await deleteBookmark(id, user?.token || '');
+      await deleteBookmark(id);
       setBookmarks(bookmarks.filter((b: any) => b.id !== id));
       setAlert({
         visible: true,
@@ -116,26 +120,23 @@ export default function BookmarksScreen() {
           bookmarks.map((bookmark: any) => (
             <View
               key={bookmark.id}
-              style={tw`bg-white rounded-2xl p-4 mb-3 border border-gray-200`}
+              style={tw`bg-white rounded-2xl p-4 mb-3 border border-gray-200 flex-row items-start justify-between`}
             >
               <TouchableOpacity
+                style={tw`flex-1 mr-3`}
                 onPress={() => router.push({
-                  pathname: '/bible/reader' as never,
+                  pathname: '/bible/book',
                   params: {
                     book: bookmark.book,
-                    chapter: bookmark.chapter,
+                    bookName: bookmark.book,
+                    chapter: String(bookmark.chapter),
                     verse: bookmark.verse
                   }
                 })}
               >
-                <View style={tw`flex-row items-start justify-between mb-2`}>
-                  <AppText style={tw`text-gray-900 text-base`} weight="bold">
-                    {bookmark.book} {bookmark.chapter}:{bookmark.verse}
-                  </AppText>
-                  <TouchableOpacity onPress={() => handleDelete(bookmark.id)}>
-                    <Ionicons name="trash-outline" size={20} color="#EF4444" />
-                  </TouchableOpacity>
-                </View>
+                <AppText style={tw`text-gray-900 text-base mb-2`} weight="bold">
+                  {bookmark.book} {bookmark.chapter}:{bookmark.verse}
+                </AppText>
 
                 {bookmark.note && (
                   <AppText style={tw`text-gray-600 text-sm mb-2`}>
@@ -146,6 +147,15 @@ export default function BookmarksScreen() {
                 <AppText style={tw`text-gray-500 text-xs`}>
                   {new Date(bookmark.createdAt).toLocaleDateString()}
                 </AppText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => handleDelete(bookmark.id)}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                accessibilityRole="button"
+                accessibilityLabel="Delete bookmark"
+              >
+                <Ionicons name="trash-outline" size={20} color="#EF4444" />
               </TouchableOpacity>
             </View>
           ))

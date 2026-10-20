@@ -1,33 +1,42 @@
-// import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import React, { useState } from 'react';
-import { Stack } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import { AuthProvider } from '../contexts/AuthContext';
-import { useAuth } from '../contexts/AuthContext';
-import { ActivityIndicator, KeyboardAvoidingView, View } from 'react-native';
-import tw from "twrnc"
+import { ActivityIndicator, Text, View } from 'react-native';
+import tw from 'twrnc';
 import { colors } from '@/constants/theme';
-import { Text } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthProvider, useAuth } from '../contexts/AuthContext';
+import { setOnUnauthorized } from '@/services/api';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-function RootLayoutNav() {
-  const [user, setUser] = useState<any>(null);
-  const { loading, setLoading } = useAuth();
+const PUBLIC_ROUTES = ['index', 'sign-in', 'sign-up', '+not-found'];
+
+function AuthGate({ children }: { children: React.ReactNode }) {
+  const { user, loading, signOut } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
   useEffect(() => {
-    const getUser = async () => {
-      setLoading(true);
-      const user = await AsyncStorage.getItem('user');
-      setUser(user);
-      setLoading(false);
+    setOnUnauthorized(() => {
+      signOut();
+    });
+    return () => setOnUnauthorized(null);
+  }, [signOut]);
+
+  useEffect(() => {
+    if (loading) return;
+    const route = segments[0] ? String(segments[0]) : 'index';
+    const inPublicGroup = PUBLIC_ROUTES.includes(route);
+
+    if (!user && !inPublicGroup) {
+      router.replace('/');
+    } else if (user && (route === 'sign-in' || route === 'sign-up')) {
+      router.replace('/(tabs)');
     }
-    getUser();
-  }, []);
+  }, [user, loading, segments, router]);
 
   if (loading) {
     return (
@@ -46,23 +55,11 @@ function RootLayoutNav() {
       </View>
     );
   }
-  console.log("User in RootLayoutNav:", user);
-  return (
-    <Stack screenOptions={{ headerShown: false }} initialRouteName='index'>
-      {user == null ? (
-        <>
-          <Stack.Screen name="sign-in" />
-          <Stack.Screen name="sign-up" />
-        </>
-      ) : (
-        <Stack.Screen name="index" />
-      )}
-    </Stack>
-  );
+
+  return <>{children}</>;
 }
 
 export default function RootLayout() {
-  // const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono_Regular: require('../assets/fonts/SpaceMono-Regular.ttf'),
     SpaceMono_Italic: require('../assets/fonts/SpaceMono-Italic.ttf'),
@@ -70,34 +67,20 @@ export default function RootLayout() {
     SpaceMono_BoldItalic: require('../assets/fonts/SpaceMono-BoldItalic.ttf'),
   });
 
-
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
 
-
   if (!loaded) return null;
 
   return (
     <AuthProvider>
-      {/* <KeyboardAvoidingView style={tw`flex-1 w-full`}> */}
-      {/* <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}> */}
+      <AuthGate>
         <StatusBar style="dark" />
-        {/* <RootLayoutNav /> */}
-        <Stack screenOptions={{ headerShown: false }} initialRouteName='index'>
-          
-        <Stack.Screen name="index" />
-        <Stack.Screen name="sign-in" />
-        <Stack.Screen name="sign-up" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="games" />
-        <Stack.Screen name="help-faq" />
-        <Stack.Screen name="bible" />
-        </Stack>
-      {/* </KeyboardAvoidingView> */}
-      {/* </ThemeProvider> */}
+        <Stack screenOptions={{ headerShown: false }} />
+      </AuthGate>
     </AuthProvider>
   );
 }

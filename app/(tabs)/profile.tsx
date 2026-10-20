@@ -16,7 +16,6 @@ import { colors } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { rateApp } from '../../utils/app-rating';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
 import AppText from '@/components/ui/AppText';
 
@@ -104,7 +103,7 @@ const SettingsItem = ({
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, signOut, setUserData } = useAuth();
+  const { user, signOut } = useAuth();
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
@@ -129,27 +128,15 @@ export default function ProfileScreen() {
   };
 
   const handleSignOut = async () => {
-      try {
-        setLoading(true);
-        await AsyncStorage.clear();
-        // console.log('signOut')
-        // const res = await signOut();
-
-        await setUserData({
-          id: '',
-          email: '',
-          name: '',
-          token: '',
-          photoURL: '',
-        });
-        router.replace('/sign-in');
-      } catch (err:any) {
-        console.log(err.response.data);
-        return false;
-      } finally {
-        setLoading(false);
-      }
-    
+    try {
+      setLoading(true);
+      await signOut();
+      router.replace('/sign-in');
+    } catch (err) {
+      console.error('Error during sign out:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRateApp = () => {
