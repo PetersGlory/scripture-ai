@@ -15,6 +15,7 @@ import AppText from '@/components/ui/AppText';
 import { PRIMARY_COLOR } from '@/constants/Colors';
 import { getHighlights, deleteHighlight } from '@/services/api';
 import CustomAlert from '@/components/CustomAlert';
+import ScreenHeader from '@/components/ui/ScreenHeader';
 
 export default function HighlightsScreen() {
   const [loading, setLoading] = useState(true);
@@ -87,27 +88,10 @@ export default function HighlightsScreen() {
 
   return (
     <SafeAreaView style={tw`flex-1 bg-gray-50`}>
-      {/* Header */}
-      <View style={tw`px-6 pt-6 pb-4 bg-white border-b border-gray-200`}>
-        <View style={tw`flex-row items-center`}>
-          <TouchableOpacity
-            onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/bible'))}
-            style={tw`mr-4`}
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
-            <Ionicons name="arrow-back" size={24} color="#1F2937" />
-          </TouchableOpacity>
-          <View style={tw`flex-1`}>
-            <AppText style={tw`text-2xl text-gray-900 mb-1`} weight="bold">
-              Highlights
-            </AppText>
-            <AppText style={tw`text-gray-600 text-sm`}>
-              {highlights.length} highlighted {highlights.length === 1 ? 'verse' : 'verses'}
-            </AppText>
-          </View>
-        </View>
-      </View>
+      <ScreenHeader
+        title="Highlights"
+        subtitle={`${highlights.length} highlighted ${highlights.length === 1 ? 'verse' : 'verses'}`}
+      />
 
       <ScrollView
         style={tw`flex-1`}

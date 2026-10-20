@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AppText from '@/components/ui/AppText';
 import { PRIMARY_COLOR } from '@/constants/Colors';
 import { getUserAchievements } from '@/services/api';
+import ScreenHeader from '@/components/ui/ScreenHeader';
 
 type Badge = {
   id: string;
@@ -184,25 +185,12 @@ export default function AchievementsScreen() {
 
   return (
     <SafeAreaView style={tw`flex-1 bg-gray-50`}>
-      {/* Header */}
-      <View style={tw`px-6 pt-8 pb-4 bg-white border-b border-gray-200`}>
-        <View style={tw`flex-row items-center mb-4`}>
-          <TouchableOpacity 
-            onPress={() => router.back()}
-            style={tw`mr-4`}
-          >
-            <Ionicons name="arrow-back" size={24} color="#1F2937" />
-          </TouchableOpacity>
-          <View style={tw`flex-1`}>
-            <AppText style={tw`text-2xl text-gray-900`} weight="bold">
-              Achievements
-            </AppText>
-            <AppText style={tw`text-gray-600 text-sm`}>
-              {totalUnlocked} of {totalBadges} unlocked ({completionPercentage}%)
-            </AppText>
-          </View>
-        </View>
+      <ScreenHeader
+        title="Achievements"
+        subtitle={`${totalUnlocked} of ${totalBadges} unlocked (${completionPercentage}%)`}
+      />
 
+      <View style={tw`bg-white px-6 pt-4 pb-4 border-b border-gray-200`}>
         {/* Progress Bar */}
         <View style={tw`h-2 bg-gray-200 rounded-full overflow-hidden mb-4`}>
           <View 

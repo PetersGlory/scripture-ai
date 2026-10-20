@@ -13,6 +13,7 @@ import tw from 'twrnc';
 import { colors } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '@/components/ui/AppText';
+import ScreenHeader from '@/components/ui/ScreenHeader';
 
 // List of supported languages
 const languages = [
@@ -53,18 +54,7 @@ export default function LanguageScreen() {
 
   return (
     <SafeAreaView style={tw`flex-1 pt-6 bg-[${colors.background}]`}>
-      {/* Header */}
-      <View style={tw`flex-row items-center p-4 border-b border-[${colors.border}]`}>
-        <TouchableOpacity 
-          onPress={() => router.back()}
-          style={tw`p-2`}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-        </TouchableOpacity>
-        <AppText style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
-          Language
-        </AppText>
-      </View>
+      <ScreenHeader title="Language" />
 
       {/* Language List */}
       <ScrollView style={tw`flex-1`}>

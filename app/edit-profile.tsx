@@ -17,6 +17,7 @@ import { colors } from '../constants/theme';
 import { useAuth } from '../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import CustomAlert from '../components/CustomAlert';
+import ScreenHeader from '@/components/ui/ScreenHeader';
 import AppText from '@/components/ui/AppText';
 
 export default function EditProfileScreen() {
@@ -125,21 +126,9 @@ export default function EditProfileScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
-      <ScrollView style={tw`flex-1 pt-6`}>
+      <ScreenHeader title="Edit Profile" />
+      <ScrollView style={tw`flex-1`}>
         <View style={tw`p-4`}>
-          {/* Header */}
-          <View style={tw`flex-row items-center mb-6`}>
-            <TouchableOpacity 
-              onPress={() => router.back()}
-              style={tw`p-2`}
-            >
-              <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-            </TouchableOpacity>
-            <AppText style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
-              Edit Profile
-            </AppText>
-          </View>
-
           {/* Profile Photo */}
           <View style={tw`items-center mb-6`}>
             <TouchableOpacity 

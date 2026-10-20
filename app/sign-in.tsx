@@ -18,6 +18,7 @@ import { useAuth } from '../contexts/AuthContext';
 import CustomAlert from '../components/CustomAlert';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '@/components/ui/AppText';
+import AppButton from '@/components/ui/AppButton';
 
 export default function SignInScreen() {
   const router = useRouter();
@@ -161,24 +162,11 @@ export default function SignInScreen() {
             </TouchableOpacity>
 
             {/* Sign In Button */}
-            <TouchableOpacity
-              style={tw`bg-[#4A7C59] py-4 rounded-2xl mt-4 shadow-lg ${loading ? 'opacity-50' : ''}`}
+            <AppButton
+              title="Sign In"
               onPress={handleSignIn}
-              disabled={loading}
-            >
-              {loading ? (
-                <View style={tw`flex-row items-center justify-center`}>
-                  <ActivityIndicator color="white" />
-                  <AppText style={tw`text-white ml-2 text-base`}>
-                    Signing in...
-                  </AppText>
-                </View>
-              ) : (
-                <AppText style={tw`text-white text-center text-base`}>
-                  Sign In
-                </AppText>
-              )}
-            </TouchableOpacity>
+              loading={loading}
+            />
 
             {/* Divider */}
             <View style={tw`flex-row items-center my-6`}>

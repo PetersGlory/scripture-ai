@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router';
 import tw from 'twrnc';
 import { colors } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import ScreenHeader from '@/components/ui/ScreenHeader';
 
 // List of Bible versions
 const bibleVersions = [
@@ -51,18 +52,7 @@ export default function BibleVersionScreen() {
 
   return (
     <View style={tw`flex-1 pt-6 bg-[${colors.background}]`}>
-      {/* Header */}
-      <View style={tw`flex-row items-center p-4 border-b border-[${colors.border}]`}>
-        <TouchableOpacity 
-          onPress={() => router.back()}
-          style={tw`p-2`}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-        </TouchableOpacity>
-        <Text style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
-          Bible Version
-        </Text>
-      </View>
+      <ScreenHeader title="Bible Version" />
 
       {/* Bible Version List */}
       <ScrollView style={tw`flex-1`}>

@@ -106,7 +106,6 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
 
   const handlePickImage = async () => {
     try {
@@ -232,14 +231,6 @@ export default function ProfileScreen() {
           switchValue={notifications}
           onSwitchChange={setNotifications}
         />
-        {/* <SettingsItem
-          icon="moon"
-          label="Dark Mode"
-          isSwitch
-          switchValue={darkMode}
-          onSwitchChange={setDarkMode}
-          showBorder={true}
-        /> */}
         <SettingsItem
           icon="trophy"
           label="Achievements"

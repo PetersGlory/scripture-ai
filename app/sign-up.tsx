@@ -18,6 +18,7 @@ import { useAuth } from '../contexts/AuthContext';
 import CustomAlert from '../components/CustomAlert';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '@/components/ui/AppText';
+import AppButton from '@/components/ui/AppButton';
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -239,24 +240,11 @@ export default function SignUpScreen() {
             </View>
 
             {/* Sign Up Button */}
-            <TouchableOpacity
-              style={tw`bg-[#4A7C59] py-4 rounded-2xl mt-4 shadow-lg ${loading ? 'opacity-50' : ''}`}
+            <AppButton
+              title="Create Account"
               onPress={handleSignUp}
-              disabled={loading}
-            >
-              {loading ? (
-                <View style={tw`flex-row items-center justify-center`}>
-                  <ActivityIndicator color="white" />
-                  <AppText style={tw`text-white ml-2 text-base`}>
-                    Creating account...
-                  </AppText>
-                </View>
-              ) : (
-                <AppText style={tw`text-white text-center text-base`}>
-                  Create Account
-                </AppText>
-              )}
-            </TouchableOpacity>
+              loading={loading}
+            />
 
             {/* Divider */}
             <View style={tw`flex-row items-center my-6`}>

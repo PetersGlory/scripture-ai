@@ -15,6 +15,8 @@ import AppText from '@/components/ui/AppText';
 import { PRIMARY_COLOR } from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import CustomAlert from '@/components/CustomAlert';
+import ScreenHeader from '@/components/ui/ScreenHeader';
+import AppButton from '@/components/ui/AppButton';
 import { triviaService, updateGameStats } from '@/services/api';
 
 type Question = {
@@ -273,25 +275,7 @@ export default function BibleTriviaScreen() {
   if (!gameStarted) {
     return (
       <SafeAreaView style={tw`flex-1 py-5 bg-gray-50`}>
-        {/* Header */}
-        <View style={tw`px-6 pt-6 pb-4 bg-white border-b border-gray-200`}>
-          <View style={tw`flex-row items-center`}>
-            <TouchableOpacity 
-              onPress={() => router.back()}
-              style={tw`mr-4`}
-            >
-              <Ionicons name="arrow-back" size={24} color="#1F2937" />
-            </TouchableOpacity>
-            <View style={tw`flex-1`}>
-              <AppText style={tw`text-2xl text-gray-900`} weight="bold">
-                Bible Trivia
-              </AppText>
-              <AppText style={tw`text-gray-600 text-sm`}>
-                Test your biblical knowledge
-              </AppText>
-            </View>
-          </View>
-        </View>
+        <ScreenHeader title="Bible Trivia" subtitle="Test your biblical knowledge" />
 
         <ScrollView 
           style={tw`flex-1`}
@@ -370,24 +354,12 @@ export default function BibleTriviaScreen() {
           </View>
 
           {/* Start Button */}
-          <TouchableOpacity
-            style={tw`bg-[${PRIMARY_COLOR}] py-4 rounded-2xl mt-4 shadow-lg`}
+          <AppButton
+            title="Start Game"
+            loadingTitle="Generating Questions..."
             onPress={startGame}
-            disabled={loading}
-          >
-            {loading ? (
-              <View style={tw`flex-row items-center justify-center`}>
-                <ActivityIndicator color="white" />
-                <AppText style={tw`text-white ml-2`} weight="bold">
-                  Generating Questions...
-                </AppText>
-              </View>
-            ) : (
-              <AppText style={tw`text-white text-center text-base`} weight="bold">
-                Start Game
-              </AppText>
-            )}
-          </TouchableOpacity>
+            loading={loading}
+          />
         </ScrollView>
 
         <CustomAlert
@@ -478,23 +450,12 @@ export default function BibleTriviaScreen() {
 
           {/* Action Buttons */}
           <View style={tw`w-full gap-3`}>
-            <TouchableOpacity
-              style={tw`bg-[${PRIMARY_COLOR}] py-4 rounded-2xl`}
-              onPress={resetGame}
-            >
-              <AppText style={tw`text-white text-center text-base`} weight="bold">
-                Play Again
-              </AppText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={tw`bg-gray-100 py-4 rounded-2xl`}
+            <AppButton title="Play Again" onPress={resetGame} />
+            <AppButton
+              title="Back to Games"
               onPress={() => router.back()}
-            >
-              <AppText style={tw`text-gray-700 text-center text-base`} weight="bold">
-                Back to Games
-              </AppText>
-            </TouchableOpacity>
+              variant="secondary"
+            />
           </View>
         </ScrollView>
       </SafeAreaView>

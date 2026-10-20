@@ -50,6 +50,12 @@
         "projectId": "9c1ff371-95ec-43ed-a88c-9ab37edd8bf2"
       }
     },
-    "owner": "peter2200"
+    "owner": "peter2200",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/9c1ff371-95ec-43ed-a88c-9ab37edd8bf2"
+    }
   }
 }

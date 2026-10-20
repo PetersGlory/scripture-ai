@@ -16,6 +16,7 @@ import { colors } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import CustomAlert from '../components/CustomAlert';
 import AppText from '@/components/ui/AppText';
+import ScreenHeader from '@/components/ui/ScreenHeader';
 
 const MAX_MESSAGE_LENGTH = 1000;
 
@@ -90,18 +91,7 @@ export default function ContactUsScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
-      {/* Header */}
-      <View style={tw`flex-row items-center p-4 border-b border-[${colors.border}]`}>
-        <TouchableOpacity 
-          onPress={() => router.back()}
-          style={tw`p-2`}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-        </TouchableOpacity>
-        <AppText  style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
-          Contact Us
-        </AppText >
-      </View>
+      <ScreenHeader title="Contact Us" />
 
       <ScrollView style={tw`flex-1`} contentContainerStyle={tw`p-4`}>
         <AppText  style={tw`text-[${colors.text.secondary}] mb-6 text-xs`} italic>

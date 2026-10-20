@@ -263,7 +263,7 @@ export default function HomeScreen() {
               <Ionicons name="arrow-back" size={24} color="#1F2937" />
             </TouchableOpacity>
             
-            <AppText style={tw`text-xs`}>
+            <AppText style={tw`text-xs text-gray-600`} accent>
               {title || "Study with Scripture AI"}
             </AppText>
 

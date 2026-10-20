@@ -17,6 +17,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppText from '@/components/ui/AppText';
+import ScreenHeader from '@/components/ui/ScreenHeader';
 
 type Bookmark = {
   id: string;
@@ -119,18 +120,7 @@ export default function BookmarksScreen() {
 
   return (
     <SafeAreaView style={tw`flex-1 pt-6 bg-[${colors.background}]`}>
-      {/* Header */}
-      <View style={tw`flex-row items-center p-4 border-b border-[${colors.border}]`}>
-        <TouchableOpacity 
-          onPress={() => router.back()}
-          style={tw`p-2`}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-        </TouchableOpacity>
-        <AppText  style={tw`text-xl font-semibold text-[${colors.text.primary}] ml-2`}>
-          My Bookmarks
-        </AppText >
-      </View>
+      <ScreenHeader title="My Bookmarks" />
 
       <ScrollView style={tw`flex-1`}>
         {loading ? (

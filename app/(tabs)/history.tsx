@@ -17,6 +17,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { getSessions } from '../../services/api';
 import CustomAlert from '../../components/CustomAlert';
+import ScreenHeader from '@/components/ui/ScreenHeader';
 import { PRIMARY_COLOR } from '@/constants/Colors';
 import AppText from '@/components/ui/AppText';
 
@@ -154,20 +155,20 @@ export default function HistoryScreen() {
 
   return (
     <SafeAreaView style={tw`flex-1 py-5 bg-[${colors.background}]`}>
-      {/* Header */}
-      <View style={tw`px-4 pt-3 pb-3 bg-white border-b border-gray-200`}>
-        <View style={tw`flex-row items-center justify-between`}>
-          <AppText style={tw`text-lg text-gray-800`} weight='bold'>
-            Chat History
-          </AppText>
-          <TouchableOpacity 
+      <ScreenHeader
+        title="Chat History"
+        showBack={false}
+        right={
+          <TouchableOpacity
             style={tw`w-10 h-10 rounded-full bg-blue-50 items-center justify-center`}
             onPress={() => router.push('/(tabs)')}
+            accessibilityRole="button"
+            accessibilityLabel="Start new chat"
           >
             <Ionicons name="add" size={24} color={PRIMARY_COLOR} />
           </TouchableOpacity>
-        </View>
-      </View>
+        }
+      />
 
       {loading && !refreshing ? (
         <View style={tw`flex-1 justify-center items-center p-4`}>
