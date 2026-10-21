@@ -233,9 +233,21 @@ export default function SignUpScreen() {
             <View style={tw`flex-row items-start mt-2`}>
               <AppText style={tw`text-gray-600 text-xs leading-5`}>
                 By signing up, you agree to our{' '}
-                <AppText style={tw`text-[#4A7C59] font-semibold`}>Terms of Service</AppText>
+                <AppText
+                  style={tw`text-[#4A7C59] font-semibold underline`}
+                  onPress={() => router.push('/terms')}
+                  accessibilityRole="link"
+                >
+                  Terms of Service
+                </AppText>
                 {' '}and{' '}
-                <AppText style={tw`text-[#4A7C59] font-semibold`}>Privacy Policy</AppText>
+                <AppText
+                  style={tw`text-[#4A7C59] font-semibold underline`}
+                  onPress={() => router.push('/privacy')}
+                  accessibilityRole="link"
+                >
+                  Privacy Policy
+                </AppText>
               </AppText>
             </View>
 

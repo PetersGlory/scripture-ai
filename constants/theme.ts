@@ -17,7 +17,15 @@ export const colors = {
   success: '#48BB78',
   warning: '#ECC94B',
 };
-
+export const BRAND = {
+  primary: "#4A7C59",
+  forest: "#1F3D2B",
+  forestLight: "#2E5740",
+  gold: "#C9A45C",
+  paper: "#F5F0E3",
+  muted: "#6B7280",
+  chevron: "#9CA3AF",
+} as const;
 export const spacing = {
   xs: 4,
   sm: 8,

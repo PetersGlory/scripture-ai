@@ -1,5 +1,5 @@
 // app/bible/reader.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -54,6 +54,10 @@ export default function BibleReaderScreen() {
   const [bookChapterCount, setBookChapterCount] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [fontSize, setFontSize] = useState(16);
+  const scrollRef = useRef<ScrollView>(null);
+  const didScrollToVerse = useRef(false);
+  const verseParam = params.verse ? parseInt(String(params.verse), 10) : undefined;
+  const targetVerse = Number.isInteger(verseParam) ? verseParam : undefined;
   const [alert, setAlert] = useState({
     visible: false,
     title: '',
@@ -119,6 +123,7 @@ export default function BibleReaderScreen() {
 
   const loadChapter = async () => {
     const chapterNum = parseInt(chapter as string, 10);
+    didScrollToVerse.current = false;
     if (!bookTitle && !bookAbbr) {
       setAlert({
         visible: true,
@@ -327,6 +332,7 @@ export default function BibleReaderScreen() {
 
       {/* Content */}
       <ScrollView 
+        ref={scrollRef}
         style={tw`flex-1`}
         contentContainerStyle={tw`px-6 py-6`}
         showsVerticalScrollIndicator={false}
@@ -335,8 +341,27 @@ export default function BibleReaderScreen() {
           <TouchableOpacity
             key={verse.verse}
             onPress={() => handleVersePress(verse)}
-            style={tw`mb-4`}
+            style={tw`mb-4 ${
+              targetVerse === verse.verse ? 'bg-[#FDE68A]/40 rounded-xl' : ''
+            }`}
             activeOpacity={0.7}
+            accessibilityLabel={`${verse.book_name} ${verse.chapter}:${verse.verse}`}
+            onLayout={(event) => {
+              if (
+                targetVerse === verse.verse &&
+                !didScrollToVerse.current &&
+                verses.length > 0
+              ) {
+                didScrollToVerse.current = true;
+                const y = event.nativeEvent.layout.y;
+                requestAnimationFrame(() => {
+                  scrollRef.current?.scrollTo({
+                    y: Math.max(y - 16, 0),
+                    animated: true,
+                  });
+                });
+              }
+            }}
           >
             <View style={tw`flex-row`}>
               <AppText 

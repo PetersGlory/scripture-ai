@@ -12,7 +12,7 @@ import { setOnUnauthorized } from '@/services/api';
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-const PUBLIC_ROUTES = ['index', 'sign-in', 'sign-up', '+not-found'];
+const PUBLIC_ROUTES = ['index', 'sign-in', 'sign-up', 'terms', 'privacy', '+not-found'];
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { user, loading, signOut } = useAuth();

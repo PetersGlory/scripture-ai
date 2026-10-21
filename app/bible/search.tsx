@@ -68,13 +68,19 @@ export default function BibleSearchScreen() {
 
   const openInReader = () => {
     if (!reference) return;
-    const match = /^(.+?)\s+(\d+)/.exec(reference);
+    const match = /^(.+?)\s+(\d+)(?::(\d+))?/.exec(reference);
     if (!match) return;
     const book = match[1].trim();
     const chapter = match[2];
+    const verse = match[3];
     router.push({
       pathname: '/bible/book',
-      params: { book, bookName: book, chapter },
+      params: {
+        book,
+        bookName: book,
+        chapter,
+        ...(verse ? { verse } : {}),
+      },
     });
   };
 

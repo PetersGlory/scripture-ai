@@ -345,7 +345,7 @@ export default function HomeScreen() {
         )}
 
         {showIntro ? (
-          <WelcomeIntro features={features} onSkip={()=>setShowIntro(false)} setMessage={setMessage} user={user} />
+          <WelcomeIntro suggestions={features} onStartChat={()=>setShowIntro(false)} onSelectSuggestion={setMessage} user={user} />
         ) : (
           <>
             <FlatList

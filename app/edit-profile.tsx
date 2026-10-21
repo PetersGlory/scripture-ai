@@ -119,7 +119,7 @@ export default function EditProfileScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={tw`flex-1 bg-[${colors.background}]`}
+      style={tw`flex-1 py-5 bg-[${colors.background}]`}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
