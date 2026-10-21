@@ -2,7 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
 
-const API_URL =  'http://192.168.0.103:5055/api';// 'https://scripture-ai-backend.onrender.com/api';
+// Configure via EXPO_PUBLIC_API_URL in .env.
+// - iOS simulator / Expo Go on the same machine: http://localhost:3000/api
+// - Android emulator: http://10.0.2.2:3000/api
+// - Physical device: http://192.168.0.103:5055/api
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.0.103:5055/api';
 const TOKEN_KEY = 'auth_token';
 
 const api = axios.create({

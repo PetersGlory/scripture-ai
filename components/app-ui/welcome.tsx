@@ -39,19 +39,19 @@ export const WelcomeIntro = ({
 
     {/* Quick Actions */}
     <View style={tw`mb-8`}>
-      {/* Voice Helper Card */}
+      {/* Study Helper Card */}
       <LinearGradient
         colors={["#4A7C59", "#3A6347"]}
         style={tw`rounded-3xl p-6 mb-4`}
       >
         <View style={tw`flex-row items-center mb-4`}>
           <View style={tw`w-10 h-10 rounded-full bg-white/20 items-center justify-center mr-3`}>
-            <Ionicons name="mic" size={20} color="white" />
+            <Ionicons name="book-outline" size={20} color="white" />
           </View>
           <AppText style={tw`text-white/80 text-sm`}>Bible Study</AppText>
         </View>
         <AppText style={tw`text-white text-lg mb-4`}>
-          Let's find new things using voice recording
+          Ask anything and let's explore Scripture together
         </AppText>
         <TouchableOpacity onPress={onSkip} style={tw`bg-white rounded-full py-3 items-center`}>
           <AppText style={tw`text-[#4A7C59] font-semibold`}>
@@ -84,11 +84,6 @@ export const WelcomeIntro = ({
         <AppText style={tw`text-lg font-bold text-gray-900`}>
           Quick Study
         </AppText>
-        <TouchableOpacity>
-          <AppText style={tw`text-sm text-[#4A7C59]`}>
-            View All
-          </AppText>
-        </TouchableOpacity>
       </View>
 
       {/* Suggested Questions */}

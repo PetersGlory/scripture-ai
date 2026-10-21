@@ -93,26 +93,26 @@ export default function CustomAlert({
             {onConfirm && (
               <TouchableOpacity
                 style={tw`
-                  bg-[${colors.primary}] px-6 py-2 rounded-xl
+                  bg-[${colors.surface}] px-6 py-2 rounded-xl
+                  border border-[${colors.border}]
                   flex-row items-center
                 `}
-                onPress={onConfirm}
+                onPress={onClose}
               >
-                <Text style={tw`text-white font-semibold`}>
-                  {confirmText}
+                <Text style={tw`text-[${colors.text.primary}] font-semibold`}>
+                  {cancelText}
                 </Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity
               style={tw`
-                bg-[${colors.surface}] px-6 py-2 rounded-xl
-                border border-[${colors.border}]
+                bg-[${colors.primary}] px-6 py-2 rounded-xl
                 flex-row items-center
               `}
-              onPress={onClose}
+              onPress={onConfirm ?? onClose}
             >
-              <Text style={tw`text-[${colors.text.primary}] font-semibold`}>
-                {cancelText}
+              <Text style={tw`text-white font-semibold`}>
+                {onConfirm ? confirmText : 'OK'}
               </Text>
             </TouchableOpacity>
           </View>

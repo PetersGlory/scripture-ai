@@ -15,8 +15,8 @@ import tw from 'twrnc';
 import { colors } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
-import { rateApp } from '../../utils/app-rating';
 import { BlurView } from 'expo-blur';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppText from '@/components/ui/AppText';
 import {
   bibleVersionAbbrev,
@@ -109,9 +109,8 @@ const SettingsItem = ({
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user, signOut, setUserData } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [notifications, setNotifications] = useState(true);
   const [bibleVersionLabel, setBibleVersionLabel] = useState('KJV');
   const [languageLabel, setLanguageLabel] = useState('English');
 
@@ -143,12 +142,20 @@ export default function ProfileScreen() {
         quality: 0.8,
       });
 
-      if (!result.canceled) {
-        // Here you would typically upload the image to your server
-        // and update the user's photoURL
-        Alert.alert('Success', 'Profile photo updated successfully');
+      if (!result.canceled && result.assets?.[0]?.uri && user) {
+        const uri = result.assets[0].uri;
+        const nextUser = {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          photoURL: uri,
+        };
+        await AsyncStorage.setItem('user', JSON.stringify(nextUser));
+        setUserData({ ...user, ...nextUser });
+        Alert.alert('Success', 'Profile photo updated');
       }
     } catch (error) {
+      console.error('Failed to update profile photo:', error);
       Alert.alert('Error', 'Failed to update profile photo');
     }
   };
@@ -157,7 +164,7 @@ export default function ProfileScreen() {
     try {
       setLoading(true);
       await signOut();
-      router.replace('/sign-in');
+      router.replace('/');
     } catch (err) {
       console.error('Error during sign out:', err);
     } finally {
@@ -166,8 +173,12 @@ export default function ProfileScreen() {
   };
 
   const handleRateApp = () => {
-    // Replace with your actual App Store ID
-    rateApp('123456789');
+    // No published store listing yet — don't send users to a bogus page.
+    Alert.alert(
+      'Enjoying Scripture AI?',
+      'The app store listing is coming soon. Thank you for your support!',
+      [{ text: 'OK' }]
+    );
   };
 
   if (loading) {
@@ -184,17 +195,19 @@ export default function ProfileScreen() {
   }
 
   return (
-    <ScrollView style={tw`flex-1 bg-[${colors.background}]`}>
+    <View style={tw`flex-1 bg-[${colors.background}]`}>
       <BlurView intensity={80} tint="systemMaterialDark" style={tw`overflow-hidden pt-6`}>
-      <View style={tw`
-        flex-row items-center justify-between 
-        px-4 py-4 border-b border-[${colors.border}]
-      `}>
-        <AppText  style={tw`text-xl font-semibold text-[${colors.surface}]`}>
-          Profile
-        </AppText >
-      </View>
+        <View style={tw`
+          flex-row items-center justify-between 
+          px-4 py-4 border-b border-[${colors.border}]
+        `}>
+          <AppText  style={tw`text-xl font-semibold text-[${colors.surface}]`}>
+            Profile
+          </AppText >
+        </View>
       </BlurView>
+
+      <ScrollView style={tw`flex-1`}>
       {/* Profile Header */}
       <View style={tw`items-center pt-6 pb-8`}>
         <View style={tw`relative`}>
@@ -257,16 +270,10 @@ export default function ProfileScreen() {
           onPress={() => router.push('/bookmarks')}
         />
         <SettingsItem
-          icon="notifications"
-          label="Notifications"
-          isSwitch
-          switchValue={notifications}
-          onSwitchChange={setNotifications}
-        />
-        <SettingsItem
           icon="trophy"
           label="Achievements"
           onPress={()=>router.push('/achievements')}
+          showBorder={false}
         />
       </SettingsSection>
 
@@ -325,6 +332,7 @@ export default function ProfileScreen() {
           Version 1.0.1
         </AppText >
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 } 

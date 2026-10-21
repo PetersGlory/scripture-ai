@@ -137,10 +137,12 @@ export default function AchievementsScreen() {
   const [totalUnlocked, setTotalUnlocked] = useState(0);
   const [totalBadges, setTotalBadges] = useState(0);
   const [filter, setFilter] = useState<'all' | 'unlocked' | 'locked'>('all');
+  const [loadError, setLoadError] = useState(false);
 
   const loadAchievements = async () => {
     try {
       setLoading(true);
+      setLoadError(false);
       const data = await getUserAchievements();
       setAchievements(data.achievements);
       setStats(data.stats);
@@ -148,6 +150,7 @@ export default function AchievementsScreen() {
       setTotalBadges(data.totalBadges);
     } catch (error) {
       console.error('Error loading achievements:', error);
+      setLoadError(true);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -178,6 +181,30 @@ export default function AchievementsScreen() {
       <SafeAreaView style={tw`flex-1 bg-gray-50`}>
         <View style={tw`flex-1 items-center justify-center`}>
           <ActivityIndicator size="large" color={PRIMARY_COLOR} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (loadError && achievements.length === 0) {
+    return (
+      <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+        <ScreenHeader title="Achievements" />
+        <View style={tw`flex-1 items-center justify-center px-8`}>
+          <Ionicons name="cloud-offline-outline" size={48} color="#9CA3AF" />
+          <AppText style={tw`text-lg text-gray-900 font-semibold mt-4 mb-2 text-center`} weight="bold">
+            Couldn't load achievements
+          </AppText>
+          <AppText style={tw`text-sm text-gray-500 text-center mb-6`}>
+            Check your connection and try again.
+          </AppText>
+          <TouchableOpacity
+            onPress={loadAchievements}
+            style={tw`bg-[${PRIMARY_COLOR}] px-8 py-3 rounded-full`}
+            accessibilityRole="button"
+          >
+            <AppText style={tw`text-white font-semibold`}>Retry</AppText>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );

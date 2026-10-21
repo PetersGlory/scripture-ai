@@ -96,25 +96,33 @@ export default function BibleScreen() {
   const [books, setBooks] = useState<any>(null);
   const [recentBookmarks, setRecentBookmarks] = useState([]);
   const [selectedTestament, setSelectedTestament] = useState<'old' | 'new'>('new');
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     loadData();
   }, []);
 
   const loadData = async () => {
+    setLoading(true);
+    setLoadError(false);
     try {
-      setLoading(true);
       const booksData = await getBibleBooks();
       setBooks(booksData.books);
-
-      if (user) {
-        const bookmarksData = await getBookmarks();
-        setRecentBookmarks(bookmarksData.bookmarks?.slice(0, 3) || []);
-      }
     } catch (error) {
       console.error('Error loading Bible data:', error);
+      setLoadError(true);
     } finally {
       setLoading(false);
+    }
+
+    // Recent bookmarks are secondary — a failure here shouldn't block the library.
+    if (user) {
+      try {
+        const bookmarksData = await getBookmarks();
+        setRecentBookmarks(bookmarksData.bookmarks?.slice(0, 3) || []);
+      } catch (error) {
+        console.error('Error loading bookmarks:', error);
+      }
     }
   };
 
@@ -123,6 +131,29 @@ export default function BibleScreen() {
       <SafeAreaView style={tw`flex-1 bg-gray-50`}>
         <View style={tw`flex-1 items-center justify-center`}>
           <ActivityIndicator size="large" color={PRIMARY_COLOR} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!books && loadError) {
+    return (
+      <SafeAreaView style={tw`flex-1 bg-gray-50`}>
+        <View style={tw`flex-1 items-center justify-center px-8`}>
+          <Ionicons name="cloud-offline-outline" size={48} color="#9CA3AF" />
+          <AppText style={tw`text-lg text-gray-900 font-semibold mt-4 mb-2 text-center`} weight="bold">
+            Couldn't load the Bible
+          </AppText>
+          <AppText style={tw`text-sm text-gray-500 text-center mb-6`}>
+            Check your connection and try again.
+          </AppText>
+          <TouchableOpacity
+            onPress={loadData}
+            style={tw`bg-[${PRIMARY_COLOR}] px-8 py-3 rounded-full`}
+            accessibilityRole="button"
+          >
+            <AppText style={tw`text-white font-semibold`}>Retry</AppText>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );

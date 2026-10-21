@@ -29,11 +29,6 @@ export const InputBar = ({
             rounded-2xl
           `}
         >
-          {/* Attach */}
-          <TouchableOpacity style={tw`mr-3`}>
-            <Ionicons name="attach-outline" size={30} color="#9CA3AF" />
-          </TouchableOpacity>
-
           {/* Text Input */}
           <TextInput
             value={message}

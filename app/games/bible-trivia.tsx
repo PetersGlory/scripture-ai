@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
   Modal,
+  Alert,
 } from 'react-native';
 import { router } from 'expo-router';
 import tw from 'twrnc';
@@ -128,17 +129,25 @@ export default function BibleTriviaScreen() {
   };
 
   const generateQuestions = async (category: string, difficulty: string): Promise<Question[]> => {
-    // This would call your backend API that uses Gemini to generate questions
-    // For now, returning mock data
-    // console.log("generating")
     try {
-        const response = await triviaService.generateTriviaQuestions(category, difficulty, 10);
-        // console.log("generated the following: ", response)
-        return response.questions;
+      const response = await triviaService.generateTriviaQuestions(category, difficulty, 10);
+      const generated = response?.questions;
+      if (Array.isArray(generated) && generated.length > 0) {
+        return generated;
+      }
+      throw new Error('No questions returned from server');
     } catch (error) {
-        console.error('Error generating questions:', error);
-        
-        return [
+      console.error('Error generating questions:', error);
+      // Be upfront: the AI round couldn't be generated, so this round uses
+      // the built-in beginner set regardless of the chosen category/difficulty.
+      setAlert({
+        visible: true,
+        title: 'Using backup questions',
+        message:
+          "AI question generation is unavailable right now, so this round uses our built-in beginner questions.",
+        type: 'warning',
+      });
+      return [
         {
             id: '1',
             question: 'Who was the first king of Israel?',
@@ -184,7 +193,7 @@ export default function BibleTriviaScreen() {
             reference: 'John 2:1-11',
             difficulty: 'medium',
         },
-        ];
+      ];
     }
   };
 
@@ -409,7 +418,7 @@ export default function BibleTriviaScreen() {
 
             <View style={tw`gap-3`}>
               <View style={tw`flex-row items-center justify-between`}>
-                <AppText style={tw`text-gray-600`}>Questions Answered</AppText>
+                <AppText style={tw`text-gray-600`}>Correct Answers</AppText>
                 <AppText style={tw`text-gray-900`} weight="bold">
                   {correctAnswers} / {questions.length}
                 </AppText>
@@ -450,7 +459,13 @@ export default function BibleTriviaScreen() {
 
           {/* Action Buttons */}
           <View style={tw`w-full gap-3`}>
-            <AppButton title="Play Again" onPress={resetGame} />
+            <AppButton
+              title="Play Again"
+              loadingTitle="Generating Questions..."
+              onPress={startGame}
+              loading={loading}
+            />
+            <AppButton title="Change Settings" onPress={resetGame} variant="secondary" />
             <AppButton
               title="Back to Games"
               onPress={() => router.back()}
@@ -458,6 +473,14 @@ export default function BibleTriviaScreen() {
             />
           </View>
         </ScrollView>
+
+        <CustomAlert
+          visible={alert.visible}
+          title={alert.title}
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert({ ...alert, visible: false })}
+        />
       </SafeAreaView>
     );
   }
@@ -468,7 +491,20 @@ export default function BibleTriviaScreen() {
       {/* Header */}
       <View style={tw`px-6 pt-3 pb-4 bg-white border-b border-gray-200`}>
         <View style={tw`flex-row items-center justify-between mb-3`}>
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity
+            accessibilityLabel="Leave game"
+            onPress={() => {
+              const inProgress = score > 0 || currentQuestionIndex > 0 || lives < 3;
+              if (!inProgress) {
+                router.back();
+                return;
+              }
+              Alert.alert('Leave game?', 'Your current progress will be lost.', [
+                { text: 'Keep playing', style: 'cancel' },
+                { text: 'Leave', style: 'destructive', onPress: () => router.back() },
+              ]);
+            }}
+          >
             <Ionicons name="close" size={24} color="#1F2937" />
           </TouchableOpacity>
 
@@ -625,6 +661,14 @@ export default function BibleTriviaScreen() {
           </TouchableOpacity>
         )}
       </ScrollView>
+
+      <CustomAlert
+        visible={alert.visible}
+        title={alert.title}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert({ ...alert, visible: false })}
+      />
     </SafeAreaView>
   );
 }

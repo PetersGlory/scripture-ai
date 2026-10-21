@@ -36,7 +36,6 @@ const games: GameCard[] = [
     iconColor: '#4A7C59',
     available: true,
     difficulty: 'All Levels',
-    playCount: 1234,
     route: '/games/bible-trivia',
     badge: 'New',
   },
@@ -182,6 +181,8 @@ export default function GamesScreen() {
         <TouchableOpacity 
           style={tw`mb-6`}
           activeOpacity={0.8}
+          onPress={() => router.push('/games/bible-trivia')}
+          accessibilityRole="button"
         >
           <View style={tw`bg-[${PRIMARY_COLOR}] rounded-2xl p-5`}>
             <View style={tw`flex-row items-center justify-between`}>
@@ -196,7 +197,7 @@ export default function GamesScreen() {
                   Today's Scripture Quiz
                 </AppText>
                 <AppText style={tw`text-white/80 text-xs`}>
-                  Complete to earn bonus points!
+                  Jump in and test what you've learned!
                 </AppText>
               </View>
               <View style={tw`w-12 h-12 rounded-full bg-white/20 items-center justify-center`}>

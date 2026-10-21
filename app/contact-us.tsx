@@ -9,6 +9,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import tw from 'twrnc';
@@ -19,6 +20,10 @@ import AppText from '@/components/ui/AppText';
 import ScreenHeader from '@/components/ui/ScreenHeader';
 
 const MAX_MESSAGE_LENGTH = 1000;
+const SUPPORT_EMAIL = 'getscriptureai@gmail.com';
+
+const buildMailto = (subject: string, body: string) =>
+  `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
 export default function ContactUsScreen() {
   const router = useRouter();
@@ -64,20 +69,26 @@ export default function ContactUsScreen() {
 
     setLoading(true);
     try {
-      // Here you would typically send the message to your backend
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Hand off to the user's email app with the message prefilled, so the
+      // message actually reaches support (there is no contact endpoint).
+      const mailto = buildMailto(subject.trim(), message.trim());
+      const canOpen = await Linking.canOpenURL(mailto);
+      if (!canOpen) {
+        throw new Error('No email app available');
+      }
+      await Linking.openURL(mailto);
       setAlert({
         visible: true,
-        title: 'Success',
-        message: 'Your message has been sent. We will get back to you soon.',
+        title: 'Opening email app',
+        message: `Your message is ready to send from your email app. You can also reach us at ${SUPPORT_EMAIL}.`,
         type: 'success',
         onConfirm: () => router.back(),
       });
     } catch (error) {
       setAlert({
         visible: true,
-        title: 'Error',
-        message: 'Failed to send message. Please try again.',
+        title: "Couldn't open email",
+        message: `Please email us directly at ${SUPPORT_EMAIL}.`,
         type: 'error',
       });
     } finally {
@@ -191,9 +202,15 @@ export default function ContactUsScreen() {
           <AppText  style={tw`text-[${colors.text.secondary}] text-center mb-2`}>
             Or reach out to us directly:
           </AppText >
-          <AppText  style={tw`text-[${colors.primary}] font-medium`}>
-            getscriptureai@gmail.com
-          </AppText >
+          <TouchableOpacity
+            onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)}
+            accessibilityRole="link"
+            accessibilityLabel={`Email ${SUPPORT_EMAIL}`}
+          >
+            <AppText  style={tw`text-[${colors.primary}] font-medium`}>
+              {SUPPORT_EMAIL}
+            </AppText >
+          </TouchableOpacity>
         </View>
       </ScrollView>
 

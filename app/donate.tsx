@@ -6,6 +6,7 @@ import {
   Linking,
   ScrollView,
   Modal,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
@@ -20,11 +21,19 @@ export default function DonateScreen() {
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
 
-  const handleDonate = (platform: string) => {
+  const handleDonate = async (platform: string) => {
     const donationLinks = {
       buymeacoffee: "https://buymeacoffee.com/scriptureai",
     };
-    Linking.openURL(donationLinks[platform as keyof typeof donationLinks]);
+    const url = donationLinks[platform as keyof typeof donationLinks];
+    if (!url) return;
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+      if (!canOpen) throw new Error('Cannot open link');
+      await Linking.openURL(url);
+    } catch (error) {
+      Alert.alert("Couldn't open link", `Please visit ${url} from a browser.`);
+    }
   };
 
   const bankDetails = {
@@ -43,7 +52,10 @@ export default function DonateScreen() {
         style={tw`overflow-hidden pt-6`}
       >
         <View style={tw`flex-row items-center justify-between px-4 py-4`}>
-          <TouchableOpacity onPress={() => router.back()} style={tw`p-2`}>
+          <TouchableOpacity
+            onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)'))}
+            style={tw`p-2`}
+          >
             <Ionicons name="arrow-back" size={24} color={colors.surface} />
           </TouchableOpacity>
           <AppText style={tw`text-base text-[${colors.surface}]`} weight="bold">

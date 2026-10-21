@@ -33,7 +33,9 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
     if (!user && !inPublicGroup) {
       router.replace('/');
-    } else if (user && (route === 'sign-in' || route === 'sign-up')) {
+    } else if (user && (route === 'sign-in' || route === 'sign-up' || route === 'index')) {
+      // Signed-in users go straight to the app — no welcome/interstitial stop,
+      // and never land back on the auth forms.
       router.replace('/(tabs)');
     }
   }, [user, loading, segments, router]);
@@ -52,6 +54,19 @@ function AuthGate({ children }: { children: React.ReactNode }) {
             </Text>
           </View>
         </View>
+      </View>
+    );
+  }
+
+  // Keep the splash up for the one frame before a redirect fires, so users
+  // never glimpse the welcome or auth screens they're being sent away from.
+  const route = segments[0] ? String(segments[0]) : 'index';
+  const redirectingAway = !!user && (route === 'sign-in' || route === 'sign-up' || route === 'index');
+  const routeIsPublic = PUBLIC_ROUTES.includes(route);
+  if (redirectingAway || (!user && !routeIsPublic)) {
+    return (
+      <View style={tw`flex-1 justify-center items-center bg-[${colors.background}]`}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }

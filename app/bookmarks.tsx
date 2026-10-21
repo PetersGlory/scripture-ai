@@ -110,7 +110,9 @@ export default function BookmarksScreen() {
         </TouchableOpacity>
       </View>
       <AppText  style={tw`text-[${colors.text.primary}] mb-2`}>
-        {item.lastMessage.slice(0, 100)}...
+        {item.lastMessage.length > 100
+          ? `${item.lastMessage.slice(0, 100)}...`
+          : item.lastMessage}
       </AppText >
       <AppText  style={tw`text-[${colors.text.light}] text-xs`}>
         Bookmarked on {new Date(item.createdAt).toLocaleDateString()}
@@ -122,33 +124,32 @@ export default function BookmarksScreen() {
     <SafeAreaView style={tw`flex-1 pt-6 bg-[${colors.background}]`}>
       <ScreenHeader title="My Bookmarks" />
 
-      <ScrollView style={tw`flex-1`}>
-        {loading ? (
-          <View style={tw`flex-1 justify-center items-center`}>
-            <ActivityIndicator color={colors.primary} size="large" />
-          </View>
-        ) : bookmarks.length > 0 ? (
-          <FlatList
-            data={bookmarks}
-            renderItem={renderBookmarkItem}
-            keyExtractor={(item) => item.sessionId}
-            contentContainerStyle={tw`p-4`}
-            refreshControl={
-              <RefreshControl refreshing={loading} onRefresh={loadBookmarks} />
-            }
-          />
-        ) : (
-          <View style={tw`flex-1 justify-center items-center p-4`}>
-            <Ionicons name="bookmark-outline" size={64} color={colors.text.light} />
-            <AppText  style={tw`text-[${colors.text.secondary}] text-center mt-4 text-lg`}>
-              You haven't bookmarked any conversations yet
-            </AppText >
-            <AppText  style={tw`text-[${colors.text.light}] text-center mt-2`}>
-              When you bookmark a conversation, it will appear here
-            </AppText >
-          </View>
-        )}
-      </ScrollView>
+      {loading ? (
+        <View style={tw`flex-1 justify-center items-center`}>
+          <ActivityIndicator color={colors.primary} size="large" />
+        </View>
+      ) : (
+        <FlatList
+          data={bookmarks}
+          renderItem={renderBookmarkItem}
+          keyExtractor={(item) => item.sessionId}
+          contentContainerStyle={tw`p-4`}
+          refreshControl={
+            <RefreshControl refreshing={loading} onRefresh={loadBookmarks} />
+          }
+          ListEmptyComponent={
+            <View style={tw`items-center p-4 mt-8`}>
+              <Ionicons name="bookmark-outline" size={64} color={colors.text.light} />
+              <AppText  style={tw`text-[${colors.text.secondary}] text-center mt-4 text-lg`}>
+                You haven't bookmarked any conversations yet
+              </AppText >
+              <AppText  style={tw`text-[${colors.text.light}] text-center mt-2`}>
+                When you bookmark a conversation, it will appear here
+              </AppText >
+            </View>
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }

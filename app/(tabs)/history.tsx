@@ -23,11 +23,12 @@ import { PRIMARY_COLOR } from '@/constants/Colors';
 import AppText from '@/components/ui/AppText';
 
 type ChatSession = {
-  id: string;
   sessionId: string;
   title: string;
   lastMessage: string;
+  messageCount?: number;
   createdAt: string;
+  updatedAt?: string;
 };
 
 function EmptyState({
@@ -71,7 +72,7 @@ function EmptyState({
 }
 
 export default function HistoryScreen() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -96,15 +97,15 @@ export default function HistoryScreen() {
       }
     } catch (error: any) {
       console.error('Error loading chat history:', error.response?.data);
-      setAlert({
-        visible: true,
-        title: 'Error',
-        message: 'Failed to load chat history. Please try again.',
-        type: 'error',
-      });
-      if (error.response?.status === 401) {
-        await signOut();
-        router.replace('/sign-in');
+      // A 401 is handled centrally by the api interceptor (clears the session
+      // and the auth gate redirects) — no local sign-out needed here.
+      if (error.response?.status !== 401) {
+        setAlert({
+          visible: true,
+          title: 'Error',
+          message: 'Failed to load chat history. Please try again.',
+          type: 'error',
+        });
       }
     } finally {
       setLoading(false);
@@ -152,9 +153,9 @@ export default function HistoryScreen() {
   };
 
   const renderHistoryItem = ({ item }: { item: ChatSession }) => (
-    <View>
-      <TouchableOpacity 
-        style={tw`flex-row items-center bg-[${colors.surface}] rounded-2xl p-4 mb-3 border border-[${colors.border}]`}
+    <View style={tw`flex-row items-center bg-[${colors.surface}] rounded-2xl mb-3 border border-[${colors.border}]`}>
+      <TouchableOpacity
+        style={tw`flex-1 flex-row items-center p-4`}
         onPress={() => router.push({
           pathname: '/(tabs)',
           params: {
@@ -164,7 +165,7 @@ export default function HistoryScreen() {
         })}
         onLongPress={() => handleDeleteSession(item)}
         accessibilityRole="button"
-        accessibilityHint="Long press to delete this chat"
+        accessibilityHint="Opens this conversation"
       >
         <View style={tw`w-10 h-10 rounded-full bg-[${colors.primary}]/10 items-center justify-center mr-3`}>
           <Ionicons name="chatbubbles-outline" size={20} color={colors.primary} />
@@ -183,6 +184,14 @@ export default function HistoryScreen() {
           </View>
         </View>
         <Ionicons name="chevron-forward" size={20} color={colors.text.light} />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={tw`pr-4 py-4 pl-1`}
+        onPress={() => handleDeleteSession(item)}
+        accessibilityRole="button"
+        accessibilityLabel={`Delete chat ${item.title}`}
+      >
+        <Ionicons name="trash-outline" size={20} color="#9CA3AF" />
       </TouchableOpacity>
     </View>
   );

@@ -37,7 +37,10 @@ export default function LanguageScreen() {
 
   return (
     <SafeAreaView style={tw`flex-1 pt-6 bg-[${colors.background}]`}>
-      <ScreenHeader title="Language" subtitle="App display language" />
+      <ScreenHeader
+        title="Language"
+        subtitle="Saved on this device — full app translation is coming soon"
+      />
 
       <ScrollView style={tw`flex-1`}>
         {LANGUAGES.map((language) => (

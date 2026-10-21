@@ -1,5 +1,5 @@
 // app/bible/reader.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -9,12 +9,12 @@ import {
   Modal,
   TextInput,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import tw from 'twrnc';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '@/components/ui/AppText';
 import { PRIMARY_COLOR } from '@/constants/Colors';
-import { getBibleChapter, createBookmark, createHighlight } from '@/services/api';
+import { getBibleChapter, getBibleBooks, createBookmark, createHighlight } from '@/services/api';
 import { getBibleVersion } from '@/services/preferences';
 import * as Clipboard from 'expo-clipboard';
 import CustomAlert from '@/components/CustomAlert';
@@ -51,6 +51,8 @@ export default function BibleReaderScreen() {
   const [highlightNote, setHighlightNote] = useState('');
   const [selectedColor, setSelectedColor] = useState(HIGHLIGHT_COLORS[0].color);
   const [version, setVersion] = useState('kjv');
+  const [bookChapterCount, setBookChapterCount] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [fontSize, setFontSize] = useState(16);
   const [alert, setAlert] = useState({
     visible: false,
@@ -59,9 +61,49 @@ export default function BibleReaderScreen() {
     type: 'success' as 'success' | 'error' | 'warning' | 'info',
   });
 
+  // Re-apply the stored version preference whenever the reader regains focus
+  // (e.g. right after changing it in Profile) — the chapter reloads below if
+  // the value actually changed.
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      getBibleVersion().then((v) => {
+        if (!cancelled) setVersion(v);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [])
+  );
+
+  // Some entry points (search, verse of the day, bookmarks) don't pass the
+  // book's chapter count — look it up so the "end of book" guard still works.
   useEffect(() => {
-    getBibleVersion().then(setVersion);
-  }, []);
+    if (totalChapters || !bookTitle) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await getBibleBooks();
+        const all = [
+          ...(data.books?.oldTestament ?? []),
+          ...(data.books?.newTestament ?? []),
+        ];
+        const key = ((bookAbbr as string) || bookTitle).toLowerCase();
+        const match = all.find(
+          (b: any) =>
+            b.abbr?.toLowerCase() === key || b.name?.toLowerCase() === key
+        );
+        if (!cancelled && match?.chapters) {
+          setBookChapterCount(match.chapters);
+        }
+      } catch (error) {
+        console.error('Error looking up book chapter count:', error);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [bookTitle, bookAbbr, totalChapters]);
 
   useEffect(() => {
     loadChapter();
@@ -149,8 +191,9 @@ export default function BibleReaderScreen() {
   };
 
   const handleBookmark = async () => {
-    if (!selectedVerse) return;
+    if (!selectedVerse || isSaving) return;
 
+    setIsSaving(true);
     try {
       await createBookmark({
         book: bookTitle,
@@ -175,12 +218,15 @@ export default function BibleReaderScreen() {
         message: 'Failed to save bookmark.',
         type: 'error',
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleHighlight = async () => {
-    if (!selectedVerse) return;
+    if (!selectedVerse || isSaving) return;
 
+    setIsSaving(true);
     try {
       await createHighlight({
         book: bookTitle,
@@ -207,6 +253,8 @@ export default function BibleReaderScreen() {
         message: 'Failed to highlight verse.',
         type: 'error',
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -219,11 +267,12 @@ export default function BibleReaderScreen() {
 
   const goToNextChapter = () => {
     const nextChapter = parseInt(chapter as string) + 1;
-    if (totalChapters && nextChapter > totalChapters) {
+    const total = totalChapters ?? bookChapterCount;
+    if (total && nextChapter > total) {
       setAlert({
         visible: true,
         title: 'End of book',
-        message: `${bookTitle} has ${totalChapters} chapter${totalChapters === 1 ? '' : 's'}.`,
+        message: `${bookTitle} has ${total} chapter${total === 1 ? '' : 's'}.`,
         type: 'info',
       });
       return;
@@ -426,11 +475,12 @@ export default function BibleReaderScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={tw`flex-1 py-4 rounded-2xl bg-[${PRIMARY_COLOR}]`}
+                style={tw`flex-1 py-4 rounded-2xl bg-[${PRIMARY_COLOR}] ${isSaving ? 'opacity-50' : ''}`}
                 onPress={handleBookmark}
+                disabled={isSaving}
               >
                 <AppText style={tw`text-white text-center`} weight="bold">
-                  Save
+                  {isSaving ? 'Saving...' : 'Save'}
                 </AppText>
               </TouchableOpacity>
             </View>
@@ -499,11 +549,12 @@ export default function BibleReaderScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={tw`flex-1 py-4 rounded-2xl bg-[${PRIMARY_COLOR}]`}
+                style={tw`flex-1 py-4 rounded-2xl bg-[${PRIMARY_COLOR}] ${isSaving ? 'opacity-50' : ''}`}
                 onPress={handleHighlight}
+                disabled={isSaving}
               >
                 <AppText style={tw`text-white text-center`} weight="bold">
-                  Highlight
+                  {isSaving ? 'Saving...' : 'Highlight'}
                 </AppText>
               </TouchableOpacity>
             </View>

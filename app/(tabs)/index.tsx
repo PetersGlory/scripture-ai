@@ -75,9 +75,24 @@ export default function HomeScreen() {
       loadSessionMessages(routeSessionId as string);
       setShowIntro(false);
     } else {
+      // Arriving at the chat root (fresh open or "Start New Chat" from History):
+      // drop any session that a previous visit left behind so a new message
+      // never appends to an old conversation.
+      setSessionId(null);
+      setMessages([]);
       setShowIntro(true);
     }
   }, [routeSessionId]);
+
+  const resetToNewChat = () => {
+    setSessionId(null);
+    setMessages([]);
+    setMessage("");
+    setShowIntro(true);
+    if (routeSessionId) {
+      router.setParams({ sessionId: "", title: "" });
+    }
+  };
 
   const loadSessionMessages = async (sid: string) => {
     try {
@@ -107,13 +122,17 @@ export default function HomeScreen() {
         setMessages(convertedMessages);
         setShowIntro(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error loading session messages:", error);
+      const notFound = error?.response?.status === 404;
       setAlert({
         visible: true,
-        title: "Error",
-        message: "Failed to load chat history. Please try again.",
+        title: notFound ? "Conversation unavailable" : "Error",
+        message: notFound
+          ? "This conversation is no longer available."
+          : "Failed to load chat history. Please try again.",
         type: "error",
+        onConfirm: resetToNewChat,
       });
     } finally {
       setIsLoading(false);
@@ -237,11 +256,31 @@ export default function HomeScreen() {
   };
 
   const handleRetry = (messageId: string) => {
-    const messageToRetry = messages.find((m) => m.id === messageId);
-    if (!messageToRetry || !messageToRetry.isUser) return;
-    setMessages((prev) => prev.filter((m) => m.id !== messageId));
-    setMessage("");
-    sendText(messageToRetry.text);
+    const index = messages.findIndex((m) => m.id === messageId);
+    if (index === -1) return;
+
+    const target = messages[index];
+
+    if (target.isUser) {
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+      sendText(target.text);
+      return;
+    }
+
+    if (target.error) {
+      let userMessage: Message | undefined;
+      for (let i = index - 1; i >= 0; i--) {
+        if (messages[i].isUser) {
+          userMessage = messages[i];
+          break;
+        }
+      }
+      if (!userMessage) return;
+      setMessages(
+        (prev) => prev.filter((m) => m.id !== messageId && m.id !== userMessage.id)
+      );
+      sendText(userMessage.text);
+    }
   };
 
   return (
@@ -253,34 +292,46 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={tw`px-4 pt-5 pb-3 bg-white border-b border-gray-100`}>
           <View style={tw`flex-row items-center justify-between`}>
-            <TouchableOpacity onPress={() => {
-              if(title){
-                setShowIntro(true)
-              }else{
-                router.back();
-              }
-            }}>
-              <Ionicons name="arrow-back" size={24} color="#1F2937" />
-            </TouchableOpacity>
-            
-            <AppText style={tw`text-xs text-gray-600`} accent>
+            {title ? (
+              <TouchableOpacity onPress={() => router.back()}>
+                <Ionicons name="arrow-back" size={24} color="#1F2937" />
+              </TouchableOpacity>
+            ) : (
+              <View style={tw`w-6`} />
+            )}
+
+            <AppText
+              style={tw`flex-1 mx-3 text-xs text-gray-600 text-center`}
+              accent
+              numberOfLines={1}
+            >
               {title || "Study with Scripture AI"}
             </AppText>
 
-            <TouchableOpacity
-              onPress={handleBookmark}
-              disabled={isLoading || authLoading || isBookmarking || !sessionId}
-            >
-              {isBookmarking ? (
-                <ActivityIndicator color="#4A7C59" size="small" />
-              ) : (
-                <Ionicons
-                  name="ellipsis-vertical"
-                  size={24}
-                  color="#1F2937"
-                />
-              )}
-            </TouchableOpacity>
+            <View style={tw`flex-row items-center gap-4`}>
+              <TouchableOpacity onPress={resetToNewChat} accessibilityLabel="Start a new chat">
+                <Ionicons name="create-outline" size={24} color="#1F2937" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleBookmark}
+                disabled={isLoading || authLoading || isBookmarking || !sessionId}
+                accessibilityLabel="Bookmark this conversation"
+              >
+                {isBookmarking ? (
+                  <ActivityIndicator color="#4A7C59" size="small" />
+                ) : (
+                  <Ionicons
+                    name={
+                      isLoading || authLoading || !sessionId
+                        ? "bookmark-outline"
+                        : "bookmark"
+                    }
+                    size={24}
+                    color={sessionId ? "#4A7C59" : "#9CA3AF"}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 

@@ -101,7 +101,7 @@ export default function HelpFAQScreen() {
   const handleContactSupport = async () => {
     setIsLoading(true);
     try {
-      await Linking.openURL('mailto:support@scriptureai.com');
+      await Linking.openURL('mailto:getscriptureai@gmail.com');
     } catch (error) {
       console.error('Error opening email client:', error);
     } finally {
