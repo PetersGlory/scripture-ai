@@ -21,7 +21,7 @@ export function TabLayouts() {
           elevation: 0,
           shadowOpacity: 0,
           height: Platform.OS === "ios" ? 88 : 88,
-          marginBottom: Platform.OS === "ios" ? 28 : 10,
+          marginBottom: Platform.OS === "ios" ? 0 : 10,
           paddingTop: 8,
         },
         headerStyle: {

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
   SafeAreaView,
-  ScrollView
+  ScrollView,
+  Alert,
 } from 'react-native';
 import tw from 'twrnc';
 import { colors } from '../../constants/theme';
@@ -15,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
-import { getSessions } from '../../services/api';
+import { getSessions, deleteChatSession } from '../../services/api';
 import CustomAlert from '../../components/CustomAlert';
 import ScreenHeader from '@/components/ui/ScreenHeader';
 import { PRIMARY_COLOR } from '@/constants/Colors';
@@ -120,7 +121,37 @@ export default function HistoryScreen() {
     loadHistory();
   };
 
-  const renderHistoryItem = ({ item, index }: { item: ChatSession; index: number }) => (
+  const handleDeleteSession = (item: ChatSession) => {
+    Alert.alert(
+      'Delete Chat',
+      `Delete "${item.title || 'Untitled Conversation'}"? This cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteChatSession(item.sessionId);
+              setSessions((prev) =>
+                prev.filter((s) => s.sessionId !== item.sessionId)
+              );
+            } catch (error) {
+              console.error('Error deleting session:', error);
+              setAlert({
+                visible: true,
+                title: 'Error',
+                message: 'Failed to delete chat. Please try again.',
+                type: 'error',
+              });
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const renderHistoryItem = ({ item }: { item: ChatSession }) => (
     <View>
       <TouchableOpacity 
         style={tw`flex-row items-center bg-[${colors.surface}] rounded-2xl p-4 mb-3 border border-[${colors.border}]`}
@@ -131,6 +162,9 @@ export default function HistoryScreen() {
             title: item.title,
           },
         })}
+        onLongPress={() => handleDeleteSession(item)}
+        accessibilityRole="button"
+        accessibilityHint="Long press to delete this chat"
       >
         <View style={tw`w-10 h-10 rounded-full bg-[${colors.primary}]/10 items-center justify-center mr-3`}>
           <Ionicons name="chatbubbles-outline" size={20} color={colors.primary} />

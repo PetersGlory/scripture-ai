@@ -1,5 +1,5 @@
 // app/bible/search.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AppText from '@/components/ui/AppText';
 import { PRIMARY_COLOR } from '@/constants/Colors';
 import { getBiblePassage } from '@/services/api';
+import { getBibleVersion } from '@/services/preferences';
 import ScreenHeader from '@/components/ui/ScreenHeader';
 
 type PassageVerse = {
@@ -27,10 +28,15 @@ type PassageVerse = {
 
 export default function BibleSearchScreen() {
   const [query, setQuery] = useState('');
+  const [version, setVersion] = useState('kjv');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reference, setReference] = useState<string | null>(null);
   const [verses, setVerses] = useState<PassageVerse[]>([]);
+
+  useEffect(() => {
+    getBibleVersion().then(setVersion);
+  }, []);
 
   const handleSearch = async () => {
     const trimmed = query.trim();
@@ -42,7 +48,7 @@ export default function BibleSearchScreen() {
       setVerses([]);
       setReference(null);
 
-      const data = await getBiblePassage(trimmed, 'kjv');
+      const data = await getBiblePassage(trimmed, version);
       if (!data?.verses?.length) {
         setError('No passage found. Try a reference like "John 3:16" or "Genesis 1".');
         return;
@@ -76,7 +82,7 @@ export default function BibleSearchScreen() {
     <SafeAreaView style={tw`flex-1 bg-gray-50`}>
       <ScreenHeader
         title="Search Scripture"
-        subtitle="Look up any verse or passage (KJV)"
+        subtitle={`Look up any verse or passage (${version.toUpperCase()})`}
       />
 
       <KeyboardAvoidingView

@@ -154,7 +154,7 @@ export default function GamesScreen() {
   return (
     <SafeAreaView style={tw`flex-1 bg-gray-50`}>
       {/* Header */}
-      <View style={tw`px-6 pt-8 pb-4 bg-white border-b border-gray-200`}>
+      <View style={tw`px-6 pt-5 pb-4 bg-white border-b border-gray-200`}>
         <View style={tw`flex-row items-center justify-between`}>
           <View style={tw`flex-1`}>
             <AppText style={tw`text-xl text-gray-900 mb-1`} weight="bold">
@@ -166,7 +166,7 @@ export default function GamesScreen() {
           </View>
           <TouchableOpacity 
             style={tw`w-11 h-11 rounded-full bg-gray-100 items-center justify-center`}
-            onPress={() => router.push('/achievements' as any)}
+            onPress={() => router.push('/achievements')}
           >
             <Ionicons name="trophy-outline" size={22} color={PRIMARY_COLOR} />
           </TouchableOpacity>

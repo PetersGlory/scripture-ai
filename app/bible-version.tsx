@@ -1,62 +1,49 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import tw from 'twrnc';
 import { colors } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import AppText from '@/components/ui/AppText';
 import ScreenHeader from '@/components/ui/ScreenHeader';
-
-// List of Bible versions
-const bibleVersions = [
-  { code: 'niv', name: 'New International Version', abbreviation: 'NIV' },
-  { code: 'kjv', name: 'King James Version', abbreviation: 'KJV' },
-  { code: 'esv', name: 'English Standard Version', abbreviation: 'ESV' },
-  { code: 'nlt', name: 'New Living Translation', abbreviation: 'NLT' },
-  { code: 'nasb', name: 'New American Standard Bible', abbreviation: 'NASB' },
-  { code: 'nkjv', name: 'New King James Version', abbreviation: 'NKJV' },
-  { code: 'csb', name: 'Christian Standard Bible', abbreviation: 'CSB' },
-  { code: 'cev', name: 'Contemporary English Version', abbreviation: 'CEV' },
-  { code: 'msg', name: 'The Message', abbreviation: 'MSG' },
-  { code: 'amp', name: 'Amplified Bible', abbreviation: 'AMP' },
-  { code: 'nrsv', name: 'New Revised Standard Version', abbreviation: 'NRSV' },
-  { code: 'ceb', name: 'Common English Bible', abbreviation: 'CEB' },
-];
+import {
+  BIBLE_VERSIONS,
+  getBibleVersion,
+  setBibleVersion,
+} from '@/services/preferences';
 
 export default function BibleVersionScreen() {
-  const router = useRouter();
-  const [selectedVersion, setSelectedVersion] = useState('niv');
-  const [loading, setLoading] = useState(false);
+  const [selectedVersion, setSelectedVersion] = useState('kjv');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    getBibleVersion().then(setSelectedVersion);
+  }, []);
 
   const handleSelectVersion = async (versionCode: string) => {
+    if (saving || versionCode === selectedVersion) return;
     setSelectedVersion(versionCode);
-    setLoading(true);
-    
+    setSaving(true);
     try {
-      // Here you would typically save the Bible version preference to your backend
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      Alert.alert('Success', 'Bible version updated successfully');
-      router.back();
+      await setBibleVersion(versionCode);
     } catch (error) {
-      Alert.alert('Error', 'Failed to update Bible version');
+      console.error('Failed to save bible version:', error);
+      setSelectedVersion(await getBibleVersion());
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
   return (
     <View style={tw`flex-1 pt-6 bg-[${colors.background}]`}>
-      <ScreenHeader title="Bible Version" />
+      <ScreenHeader title="Bible Version" subtitle="Used for reading and search" />
 
-      {/* Bible Version List */}
       <ScrollView style={tw`flex-1`}>
-        {bibleVersions.map((version) => (
+        {BIBLE_VERSIONS.map((version) => (
           <TouchableOpacity
             key={version.code}
             style={tw`
@@ -64,18 +51,23 @@ export default function BibleVersionScreen() {
               ${selectedVersion === version.code ? `bg-[${colors.primary}]/10` : ''}
             `}
             onPress={() => handleSelectVersion(version.code)}
-            disabled={loading}
+            disabled={saving}
+            accessibilityRole="button"
+            accessibilityState={{ selected: selectedVersion === version.code }}
           >
             <View style={tw`flex-1`}>
-              <Text style={tw`
-                text-base
-                ${selectedVersion === version.code ? `text-[${colors.primary}] font-semibold` : `text-[${colors.text.primary}]`}
-              `}>
+              <AppText
+                style={tw`
+                  text-base
+                  ${selectedVersion === version.code ? `text-[${colors.primary}]` : `text-[${colors.text.primary}]`}
+                `}
+                weight={selectedVersion === version.code ? 'bold' : 'regular'}
+              >
                 {version.name}
-              </Text>
-              <Text style={tw`text-sm text-[${colors.text.secondary}]`}>
+              </AppText>
+              <AppText style={tw`text-sm text-[${colors.text.secondary}]`}>
                 {version.abbreviation}
-              </Text>
+              </AppText>
             </View>
             {selectedVersion === version.code && (
               <Ionicons name="checkmark" size={24} color={colors.primary} />
@@ -84,12 +76,11 @@ export default function BibleVersionScreen() {
         ))}
       </ScrollView>
 
-      {/* Loading Indicator */}
-      {loading && (
+      {saving && (
         <View style={tw`absolute inset-0 bg-black/30 items-center justify-center`}>
           <ActivityIndicator color={colors.primary} size="large" />
         </View>
       )}
     </View>
   );
-} 
+}

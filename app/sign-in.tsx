@@ -110,10 +110,10 @@ export default function SignInScreen() {
               <AppText style={tw`text-gray-700 mb-2 font-medium text-sm`}>
                 Email Address
               </AppText>
-              <View style={tw`flex-row items-center bg-gray-50 rounded-2xl px-4 border border-gray-200`}>
+              <View style={tw`flex-row items-center py-4 bg-gray-50 rounded-2xl px-4 border border-gray-200`}>
                 <Ionicons name="mail-outline" size={20} color="#9CA3AF" />
                 <TextInput
-                  style={tw`flex-1 py-4 px-3 text-gray-900 text-base`}
+                  style={tw`flex-1 px-3 text-gray-900 text-base h-auto`}
                   placeholder="Enter your email"
                   placeholderTextColor="#9CA3AF"
                   value={email}
@@ -153,13 +153,6 @@ export default function SignInScreen() {
                 </TouchableOpacity>
               </View>
             </View>
-
-            {/* Forgot Password */}
-            <TouchableOpacity style={tw`self-end`}>
-              <AppText style={tw`text-[#4A7C59] font-medium text-sm`}>
-                Forgot Password?
-              </AppText>
-            </TouchableOpacity>
 
             {/* Sign In Button */}
             <AppButton

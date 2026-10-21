@@ -15,6 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import AppText from '@/components/ui/AppText';
 import { PRIMARY_COLOR } from '@/constants/Colors';
 import { getBibleChapter, createBookmark, createHighlight } from '@/services/api';
+import { getBibleVersion } from '@/services/preferences';
+import * as Clipboard from 'expo-clipboard';
 import CustomAlert from '@/components/CustomAlert';
 
 type Verse = {
@@ -35,7 +37,7 @@ const HIGHLIGHT_COLORS = [
 
 export default function BibleReaderScreen() {
   const params = useLocalSearchParams();
-  const { bookAbbr, chapter, testament } = params;
+  const { bookAbbr, chapter } = params;
   const bookTitle = (params.book as string) || (params.bookName as string) || '';
   const totalChapters = params.chapters ? parseInt(params.chapters as string, 10) : undefined;
 
@@ -56,6 +58,10 @@ export default function BibleReaderScreen() {
     message: '',
     type: 'success' as 'success' | 'error' | 'warning' | 'info',
   });
+
+  useEffect(() => {
+    getBibleVersion().then(setVersion);
+  }, []);
 
   useEffect(() => {
     loadChapter();
@@ -116,6 +122,30 @@ export default function BibleReaderScreen() {
   const handleVersePress = (verse: Verse) => {
     setSelectedVerse(verse);
     setShowMenu(true);
+  };
+
+  const handleCopyVerse = async () => {
+    if (!selectedVerse) return;
+    try {
+      const citation = `${selectedVerse.book_name} ${selectedVerse.chapter}:${selectedVerse.verse}`;
+      const text = `"${selectedVerse.text}" — ${citation} (${version.toUpperCase()})`;
+      await Clipboard.setStringAsync(text);
+      setShowMenu(false);
+      setAlert({
+        visible: true,
+        title: 'Copied',
+        message: `${citation} copied to clipboard.`,
+        type: 'success',
+      });
+    } catch (error) {
+      setShowMenu(false);
+      setAlert({
+        visible: true,
+        title: 'Error',
+        message: 'Failed to copy verse.',
+        type: 'error',
+      });
+    }
   };
 
   const handleBookmark = async () => {
@@ -345,10 +375,7 @@ export default function BibleReaderScreen() {
 
             <TouchableOpacity
               style={tw`flex-row items-center py-4`}
-              onPress={() => {
-                // Copy to clipboard functionality
-                setShowMenu(false);
-              }}
+              onPress={handleCopyVerse}
             >
               <Ionicons name="copy-outline" size={24} color="#6B7280" />
               <AppText style={tw`text-gray-900 ml-4`} weight="regular">

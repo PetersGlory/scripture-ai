@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import tw from 'twrnc';
 import { colors } from '../../constants/theme';
@@ -18,6 +18,12 @@ import { useAuth } from '../../contexts/AuthContext';
 import { rateApp } from '../../utils/app-rating';
 import { BlurView } from 'expo-blur';
 import AppText from '@/components/ui/AppText';
+import {
+  bibleVersionAbbrev,
+  getBibleVersion,
+  getLanguage,
+  languageName,
+} from '@/services/preferences';
 
 type SettingsSectionProps = {
   title: string;
@@ -106,6 +112,27 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState(true);
+  const [bibleVersionLabel, setBibleVersionLabel] = useState('KJV');
+  const [languageLabel, setLanguageLabel] = useState('English');
+
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      (async () => {
+        const [version, language] = await Promise.all([
+          getBibleVersion(),
+          getLanguage(),
+        ]);
+        if (!cancelled) {
+          setBibleVersionLabel(bibleVersionAbbrev(version));
+          setLanguageLabel(languageName(language));
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, [])
+  );
 
   const handlePickImage = async () => {
     try {
@@ -221,7 +248,12 @@ export default function ProfileScreen() {
         />
         <SettingsItem
           icon="bookmark-outline"
-          label="Bookmarks"
+          label="Verse Bookmarks"
+          onPress={() => router.push('/bible/bookmarks')}
+        />
+        <SettingsItem
+          icon="chatbubbles-outline"
+          label="Saved Chats"
           onPress={() => router.push('/bookmarks')}
         />
         <SettingsItem
@@ -242,13 +274,13 @@ export default function ProfileScreen() {
         <SettingsItem
           icon="language"
           label="Language"
-          value="English"
+          value={languageLabel}
           onPress={() => router.push('/language')}
         />
         <SettingsItem
           icon="book"
           label="Bible Version"
-          value="NIV"
+          value={bibleVersionLabel}
           onPress={() => router.push('/bible-version')}
           showBorder={false}
         />

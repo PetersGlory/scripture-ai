@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import tw from 'twrnc';
 import { colors } from '../constants/theme';
 import { useAuth } from '../contexts/AuthContext';
@@ -22,9 +23,9 @@ import AppText from '@/components/ui/AppText';
 
 export default function EditProfileScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, setUserData } = useAuth();
   const [name, setName] = useState(user?.name || '');
-  const [email, setEmail] = useState(user?.email || '');
+  const [email] = useState(user?.email || '');
   const [loading, setLoading] = useState(false);
   const [photoURL, setPhotoURL] = useState(user?.photoURL || null);
   const [errors, setErrors] = useState<{
@@ -45,24 +46,13 @@ export default function EditProfileScreen() {
   });
   const [isPickingImage, setIsPickingImage] = useState(false);
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
   const validateForm = () => {
     const newErrors: typeof errors = {};
-    
+
     if (!name.trim()) {
       newErrors.name = 'Name is required';
     }
-    
-    if (!email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!validateEmail(email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -95,12 +85,18 @@ export default function EditProfileScreen() {
   };
 
   const handleSave = async () => {
-    if (!validateForm()) return;
+    if (!validateForm() || !user) return;
 
     setLoading(true);
     try {
-      // Here you would typically call your API to update the user profile
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const nextUser = {
+        id: user.id,
+        email: user.email,
+        name: name.trim(),
+        photoURL: photoURL ?? undefined,
+      };
+      await AsyncStorage.setItem('user', JSON.stringify(nextUser));
+      setUserData({ ...user, ...nextUser });
       setAlert({
         visible: true,
         title: 'Success',
@@ -109,6 +105,7 @@ export default function EditProfileScreen() {
         onConfirm: () => router.back(),
       });
     } catch (error) {
+      console.error('Failed to save profile:', error);
       setAlert({
         visible: true,
         title: 'Error',
@@ -208,28 +205,17 @@ export default function EditProfileScreen() {
               </AppText>
               <TextInput
                 style={tw`
-                  bg-[${colors.surface}] p-4 rounded-xl
-                  text-[${colors.text.primary}]
-                  ${errors.email ? 'border border-[${colors.error}]' : ''}
+                  bg-gray-100 p-4 rounded-xl
+                  text-[${colors.text.light}]
                 `}
-                placeholder="Enter your email"
-                placeholderTextColor={colors.text.light}
                 value={email}
-                onChangeText={(text) => {
-                  setEmail(text);
-                  if (errors.email) {
-                    setErrors({ ...errors, email: undefined });
-                  }
-                }}
-                keyboardType="email-address"
+                editable={false}
                 autoCapitalize="none"
-                editable={!loading}
+                keyboardType="email-address"
               />
-              {errors.email && (
-                <AppText style={tw`text-[${colors.error}] text-sm mt-1`}>
-                  {errors.email}
-                </AppText>
-              )}
+              <AppText style={tw`text-[${colors.text.light}] text-sm mt-1`}>
+                Your sign-in email can't be changed here.
+              </AppText>
             </View>
           </View>
 

@@ -1,64 +1,46 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Alert,
   SafeAreaView,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import tw from 'twrnc';
 import { colors } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '@/components/ui/AppText';
 import ScreenHeader from '@/components/ui/ScreenHeader';
-
-// List of supported languages
-const languages = [
-  { code: 'en', name: 'English' },
-  { code: 'es', name: 'Español' },
-  { code: 'fr', name: 'Français' },
-  { code: 'de', name: 'Deutsch' },
-  { code: 'it', name: 'Italiano' },
-  { code: 'pt', name: 'Português' },
-  { code: 'ru', name: 'Русский' },
-  { code: 'zh', name: '中文' },
-  { code: 'ja', name: '日本語' },
-  { code: 'ko', name: '한국어' },
-  { code: 'ar', name: 'العربية' },
-  { code: 'hi', name: 'हिन्दी' },
-];
+import { LANGUAGES, getLanguage, setLanguage } from '@/services/preferences';
 
 export default function LanguageScreen() {
-  const router = useRouter();
   const [selectedLanguage, setSelectedLanguage] = useState('en');
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    getLanguage().then(setSelectedLanguage);
+  }, []);
 
   const handleSelectLanguage = async (languageCode: string) => {
+    if (saving || languageCode === selectedLanguage) return;
     setSelectedLanguage(languageCode);
-    setLoading(true);
-    
+    setSaving(true);
     try {
-      // Here you would typically save the language preference to your backend
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      Alert.alert('Success', 'Language updated successfully');
-      router.back();
+      await setLanguage(languageCode);
     } catch (error) {
-      Alert.alert('Error', 'Failed to update language');
+      console.error('Failed to save language pref:', error);
+      setSelectedLanguage(await getLanguage());
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
   return (
     <SafeAreaView style={tw`flex-1 pt-6 bg-[${colors.background}]`}>
-      <ScreenHeader title="Language" />
+      <ScreenHeader title="Language" subtitle="App display language" />
 
-      {/* Language List */}
       <ScrollView style={tw`flex-1`}>
-        {languages.map((language) => (
+        {LANGUAGES.map((language) => (
           <TouchableOpacity
             key={language.code}
             style={tw`
@@ -66,12 +48,17 @@ export default function LanguageScreen() {
               ${selectedLanguage === language.code ? `bg-[${colors.primary}]/10` : ''}
             `}
             onPress={() => handleSelectLanguage(language.code)}
-            disabled={loading}
+            disabled={saving}
+            accessibilityRole="button"
+            accessibilityState={{ selected: selectedLanguage === language.code }}
           >
-            <AppText style={tw`
-              flex-1 text-base
-              ${selectedLanguage === language.code ? `text-[${colors.primary}] font-semibold` : `text-[${colors.text.primary}]`}
-            `}>
+            <AppText
+              style={tw`
+                flex-1 text-base
+                ${selectedLanguage === language.code ? `text-[${colors.primary}]` : `text-[${colors.text.primary}]`}
+              `}
+              weight={selectedLanguage === language.code ? 'bold' : 'regular'}
+            >
               {language.name}
             </AppText>
             {selectedLanguage === language.code && (
@@ -81,12 +68,11 @@ export default function LanguageScreen() {
         ))}
       </ScrollView>
 
-      {/* Loading Indicator */}
-      {loading && (
+      {saving && (
         <View style={tw`absolute inset-0 bg-black/30 items-center justify-center`}>
           <ActivityIndicator color={colors.primary} size="large" />
         </View>
       )}
     </SafeAreaView>
   );
-} 
+}
