@@ -2,7 +2,7 @@ import { BRAND, colors } from "@/constants/theme";
 import { User } from "@/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   AccessibilityInfo,
   Animated,
@@ -104,8 +104,8 @@ const getFirstName = (user: User | null): string | null => {
 
 
 const useEntrance = () => {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(12)).current;
+  const [opacity] = useState(() => new Animated.Value(0));
+  const [translateY] = useState(() => new Animated.Value(12));
 
   useEffect(() => {
     let cancelled = false;

@@ -16,6 +16,13 @@ import AppText from '@/components/ui/AppText';
 import { PRIMARY_COLOR } from '@/constants/Colors';
 import { getBibleChapter, getBibleBooks, createBookmark, createHighlight } from '@/services/api';
 import { getBibleVersion } from '@/services/preferences';
+import {
+  getCachedChapter,
+  cacheChapter,
+  getCachedBooks,
+  getBookDownloadStatus,
+} from '@/services/bibleCache';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import * as Clipboard from 'expo-clipboard';
 import CustomAlert from '@/components/CustomAlert';
 
@@ -56,8 +63,17 @@ export default function BibleReaderScreen() {
   const [fontSize, setFontSize] = useState(16);
   const scrollRef = useRef<ScrollView>(null);
   const didScrollToVerse = useRef(false);
+  const downloadCancelRef = useRef(false);
+  const [offline, setOffline] = useState(false);
+  const [downloadState, setDownloadState] = useState<{
+    status: 'downloading' | 'complete';
+    current: number;
+    total: number;
+  } | null>(null);
+  const isOnline = useNetworkStatus();
   const verseParam = params.verse ? parseInt(String(params.verse), 10) : undefined;
   const targetVerse = Number.isInteger(verseParam) ? verseParam : undefined;
+  const chapterTotal = totalChapters ?? bookChapterCount;
   const [alert, setAlert] = useState({
     visible: false,
     title: '',
@@ -81,27 +97,33 @@ export default function BibleReaderScreen() {
   );
 
   // Some entry points (search, verse of the day, bookmarks) don't pass the
-  // book's chapter count — look it up so the "end of book" guard still works.
+  // book's chapter count — look it up (cache-first) so the "end of book"
+  // guard and the offline-download button still work.
   useEffect(() => {
     if (totalChapters || !bookTitle) return;
     let cancelled = false;
+    const applyMatch = (all: any[]) => {
+      const key = ((bookAbbr as string) || bookTitle).toLowerCase();
+      const match = all.find(
+        (b: any) =>
+          b.abbr?.toLowerCase() === key || b.name?.toLowerCase() === key
+      );
+      if (!cancelled && match?.chapters) {
+        setBookChapterCount(match.chapters);
+      }
+    };
     (async () => {
       try {
         const data = await getBibleBooks();
-        const all = [
-          ...(data.books?.oldTestament ?? []),
-          ...(data.books?.newTestament ?? []),
-        ];
-        const key = ((bookAbbr as string) || bookTitle).toLowerCase();
-        const match = all.find(
-          (b: any) =>
-            b.abbr?.toLowerCase() === key || b.name?.toLowerCase() === key
-        );
-        if (!cancelled && match?.chapters) {
-          setBookChapterCount(match.chapters);
-        }
+        applyMatch([...(data.books?.oldTestament ?? []), ...(data.books?.newTestament ?? [])]);
       } catch (error) {
-        console.error('Error looking up book chapter count:', error);
+        // Network failed — try the cached book snapshot so chapter counts work offline.
+        const cached = await getCachedBooks();
+        if (cached) {
+          applyMatch([...cached.oldTestament, ...cached.newTestament]);
+        } else {
+          console.error('Error looking up book chapter count:', error);
+        }
       }
     })();
     return () => {
@@ -112,6 +134,28 @@ export default function BibleReaderScreen() {
   useEffect(() => {
     loadChapter();
   }, [bookTitle, bookAbbr, chapter, version]);
+
+  // Track download status for the current book + version.
+  useEffect(() => {
+    if (!chapterTotal || !bookTitle) return;
+    let cancelled = false;
+    (async () => {
+      const status = await getBookDownloadStatus(
+        (bookAbbr as string) || bookTitle,
+        chapterTotal,
+        version
+      );
+      if (cancelled) return;
+      if (status.complete) {
+        setDownloadState({ status: 'complete', current: status.downloaded, total: status.total });
+      } else if (downloadState?.status !== 'downloading') {
+        setDownloadState(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [bookTitle, bookAbbr, version, chapterTotal]);
 
   const goBack = () => {
     if (router.canGoBack()) {
@@ -145,25 +189,75 @@ export default function BibleReaderScreen() {
       return;
     }
 
+    const bookKey = (bookAbbr as string) || bookTitle;
+
+    // Cache-first: if we've read this chapter before, render instantly with
+    // no network round-trip (and no failure mode when offline).
+    const cached = await getCachedChapter(bookKey, chapterNum, version);
+    if (cached) {
+      setVerses(cached);
+      setOffline(false);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      const data = await getBibleChapter(
-        (bookAbbr as string) || bookTitle,
-        chapterNum,
-        version
-      );
+      const data = await getBibleChapter(bookKey, chapterNum, version);
       setVerses(data.chapter.verses);
+      setOffline(false);
+      // Lazy fill: cache the chapter so future reads (and offline) work.
+      cacheChapter(bookKey, chapterNum, version, data.chapter.verses);
     } catch (error: any) {
       console.error('Error loading chapter:', error?.response?.data ?? error?.message);
+      setOffline(true);
       setAlert({
         visible: true,
-        title: 'Error',
-        message: 'Failed to load chapter. Please try again.',
+        title: isOnline ? 'Error' : "You're offline",
+        message: isOnline
+          ? 'Failed to load chapter. Please try again.'
+          : 'This chapter has not been downloaded yet. Connect to the internet to load it.',
         type: 'error',
       });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownloadBook = async () => {
+    if (!chapterTotal || downloadState?.status === 'downloading') return;
+    downloadCancelRef.current = false;
+    setDownloadState({ status: 'downloading', current: 0, total: chapterTotal });
+    const bookKey = (bookAbbr as string) || bookTitle;
+    for (let i = 1; i <= chapterTotal; i++) {
+      if (downloadCancelRef.current) {
+        setDownloadState(null);
+        return;
+      }
+      try {
+        const existing = await getCachedChapter(bookKey, i, version);
+        if (!existing) {
+          const data = await getBibleChapter(bookKey, i, version);
+          await cacheChapter(bookKey, i, version, data.chapter.verses);
+        }
+        setDownloadState({ status: 'downloading', current: i, total: chapterTotal });
+      } catch {
+        downloadCancelRef.current = true;
+        setDownloadState(null);
+        setAlert({
+          visible: true,
+          title: 'Download paused',
+          message: 'Connection lost. Chapters already downloaded remain available offline.',
+          type: 'warning',
+        });
+        return;
+      }
+    }
+    setDownloadState({ status: 'complete', current: chapterTotal, total: chapterTotal });
+  };
+
+  const handleCancelDownload = () => {
+    downloadCancelRef.current = true;
   };
 
   const handleVersePress = (verse: Verse) => {
@@ -329,6 +423,56 @@ export default function BibleReaderScreen() {
           </View>
         </View>
       </View>
+
+      {/* Offline banner */}
+      {!isOnline && (
+        <View style={tw`bg-amber-50 px-6 py-2 border-b border-amber-200`}>
+          <View style={tw`flex-row items-center`}>
+            <Ionicons name="cloud-offline-outline" size={16} color="#B45309" />
+            <AppText style={tw`text-amber-800 text-xs ml-2 flex-1`}>
+              You're offline — reading from downloaded chapters.
+            </AppText>
+          </View>
+        </View>
+      )}
+
+      {/* Offline download bar */}
+      {chapterTotal && chapterTotal > 1 && !offline && (
+        <View style={tw`bg-gray-50 px-6 py-2 border-b border-gray-200`}>
+          {downloadState?.status === 'downloading' ? (
+            <TouchableOpacity
+              onPress={handleCancelDownload}
+              style={tw`flex-row items-center`}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel download"
+            >
+              <Ionicons name="download-outline" size={16} color={PRIMARY_COLOR} />
+              <AppText style={tw`text-[${PRIMARY_COLOR}] text-xs ml-2 flex-1`}>
+                Downloading {bookTitle}… {downloadState.current}/{downloadState.total} · Tap to cancel
+              </AppText>
+            </TouchableOpacity>
+          ) : downloadState?.status === 'complete' ? (
+            <View style={tw`flex-row items-center`}>
+              <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+              <AppText style={tw`text-gray-600 text-xs ml-2 flex-1`}>
+                {bookTitle} is available offline ({version.toUpperCase()})
+              </AppText>
+            </View>
+          ) : (
+            <TouchableOpacity
+              onPress={handleDownloadBook}
+              style={tw`flex-row items-center`}
+              accessibilityRole="button"
+              accessibilityLabel={`Download ${bookTitle} for offline reading`}
+            >
+              <Ionicons name="download-outline" size={16} color={PRIMARY_COLOR} />
+              <AppText style={tw`text-[${PRIMARY_COLOR}] text-xs ml-2 flex-1`}>
+                Download {bookTitle} for offline reading
+              </AppText>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
 
       {/* Content */}
       <ScrollView 

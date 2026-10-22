@@ -14,6 +14,8 @@ import AppText from '@/components/ui/AppText';
 import { PRIMARY_COLOR } from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { getBibleBooks, getBookmarks } from '@/services/api';
+import { cacheBooks, getCachedBooks } from '@/services/bibleCache';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { LinearGradient } from 'expo-linear-gradient';
 
 type Book = {
@@ -92,11 +94,13 @@ const BookCard = ({
 
 export default function BibleScreen() {
   const { user } = useAuth();
+  const isOnline = useNetworkStatus();
   const [loading, setLoading] = useState(true);
   const [books, setBooks] = useState<any>(null);
   const [recentBookmarks, setRecentBookmarks] = useState([]);
   const [selectedTestament, setSelectedTestament] = useState<'old' | 'new'>('new');
   const [loadError, setLoadError] = useState(false);
+  const [fromCache, setFromCache] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -108,9 +112,19 @@ export default function BibleScreen() {
     try {
       const booksData = await getBibleBooks();
       setBooks(booksData.books);
+      setFromCache(false);
+      cacheBooks(booksData.books);
     } catch (error) {
       console.error('Error loading Bible data:', error);
-      setLoadError(true);
+      // Network failed — fall back to the cached snapshot so the library still works offline.
+      const cached = await getCachedBooks();
+      if (cached) {
+        setBooks(cached);
+        setFromCache(true);
+        setLoadError(false);
+      } else {
+        setLoadError(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -180,6 +194,18 @@ export default function BibleScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Offline banner */}
+      {(!isOnline || fromCache) && (
+        <View style={tw`bg-amber-50 px-6 py-2 border-b border-amber-200`}>
+          <View style={tw`flex-row items-center`}>
+            <Ionicons name="cloud-offline-outline" size={16} color="#B45309" />
+            <AppText style={tw`text-amber-800 text-xs ml-2 flex-1`}>
+              You're offline — showing downloaded chapters.
+            </AppText>
+          </View>
+        </View>
+      )}
 
       <ScrollView 
         style={tw`flex-1`}

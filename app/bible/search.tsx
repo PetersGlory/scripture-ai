@@ -17,6 +17,8 @@ import AppText from '@/components/ui/AppText';
 import { PRIMARY_COLOR } from '@/constants/Colors';
 import { getBiblePassage } from '@/services/api';
 import { getBibleVersion } from '@/services/preferences';
+import { getCachedPassage } from '@/services/bibleCache';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import ScreenHeader from '@/components/ui/ScreenHeader';
 
 type PassageVerse = {
@@ -33,6 +35,8 @@ export default function BibleSearchScreen() {
   const [error, setError] = useState<string | null>(null);
   const [reference, setReference] = useState<string | null>(null);
   const [verses, setVerses] = useState<PassageVerse[]>([]);
+  const [fromCache, setFromCache] = useState(false);
+  const isOnline = useNetworkStatus();
 
   useEffect(() => {
     getBibleVersion().then(setVersion);
@@ -42,24 +46,40 @@ export default function BibleSearchScreen() {
     const trimmed = query.trim();
     if (!trimmed) return;
 
-    try {
-      setLoading(true);
-      setError(null);
-      setVerses([]);
-      setReference(null);
+    setLoading(true);
+    setError(null);
+    setVerses([]);
+    setReference(null);
+    setFromCache(false);
 
+    // Cache-first: single-chapter references ("John 3:16", "Genesis 1",
+    // "John 3:16-18") resolve entirely from downloaded chapters — works offline.
+    const cached = await getCachedPassage(trimmed, version);
+    if (cached) {
+      setVerses(cached.verses);
+      setReference(cached.reference);
+      setFromCache(true);
+      setLoading(false);
+      return;
+    }
+
+    try {
       const data = await getBiblePassage(trimmed, version);
-      if (!data?.verses?.length) {
+      // Route returns { success, passage: { reference, verses, ... } }
+      const passage = data?.passage;
+      if (!passage?.verses?.length) {
         setError('No passage found. Try a reference like "John 3:16" or "Genesis 1".');
         return;
       }
-      setVerses(data.verses);
-      setReference(data.reference);
+      setVerses(passage.verses);
+      setReference(passage.reference);
     } catch (err: any) {
       const message =
         err?.response?.data?.message ||
         err?.message ||
-        'Failed to look up that reference.';
+        (isOnline
+          ? 'Failed to look up that reference.'
+          : "You're offline and this reference hasn't been downloaded yet.");
       setError(message);
     } finally {
       setLoading(false);
@@ -90,6 +110,18 @@ export default function BibleSearchScreen() {
         title="Search Scripture"
         subtitle={`Look up any verse or passage (${version.toUpperCase()})`}
       />
+
+      {/* Offline banner */}
+      {!isOnline && (
+        <View style={tw`bg-amber-50 px-6 py-2 border-b border-amber-200`}>
+          <View style={tw`flex-row items-center`}>
+            <Ionicons name="cloud-offline-outline" size={16} color="#B45309" />
+            <AppText style={tw`text-amber-800 text-xs ml-2 flex-1`}>
+              You're offline — downloaded references still work.
+            </AppText>
+          </View>
+        </View>
+      )}
 
       <KeyboardAvoidingView
         style={tw`flex-1`}
@@ -144,9 +176,16 @@ export default function BibleSearchScreen() {
           {reference && verses.length > 0 && (
             <View>
               <View style={tw`flex-row items-center justify-between mb-3`}>
-                <AppText style={tw`text-gray-900 text-lg`} weight="bold">
-                  {reference}
-                </AppText>
+                <View style={tw`flex-row items-center flex-1`}>
+                  <AppText style={tw`text-gray-900 text-lg`} weight="bold">
+                    {reference}
+                  </AppText>
+                  {fromCache && (
+                    <View style={tw`ml-2 bg-gray-100 rounded-full px-2 py-0.5`}>
+                      <AppText style={tw`text-gray-500 text-xs`}>Downloaded</AppText>
+                    </View>
+                  )}
+                </View>
                 <TouchableOpacity onPress={openInReader}>
                   <AppText style={{ color: PRIMARY_COLOR }} weight="bold">
                     Open chapter
