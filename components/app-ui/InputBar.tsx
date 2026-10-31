@@ -33,7 +33,7 @@ export const InputBar = ({
           <TextInput
             value={message}
             onChangeText={setMessage}
-            placeholder="Message Scripture AI..."
+            placeholder="Message Emunah AI..."
             placeholderTextColor="#9CA3AF"
             style={tw`
               flex-1 

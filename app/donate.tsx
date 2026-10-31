@@ -50,7 +50,7 @@ const US_BANK_DETAILS = [
 const SUPPORT_POINTS = [
   "Cover AI and server costs",
   "Develop new features and improvements",
-  "Keep Scripture AI free for everyone",
+  "Keep Emunah AI free for everyone",
 ] as const;
 
 type BankRegion = "ng" | "us";
@@ -251,7 +251,7 @@ export default function DonateScreen() {
             style={tw`text-base text-center text-[${colors.text.primary}]`}
             weight="bold"
           >
-            Support Scripture AI
+            Support Emunah AI
           </AppText>
         </View>
 
@@ -279,10 +279,10 @@ export default function DonateScreen() {
             },
           ]}
         >
-          Keep Scripture AI free for everyone.
+          Keep Emunah AI free for everyone.
         </Text>
         <AppText style={tw`text-base text-[${colors.text.secondary}] mb-8`}>
-          Scripture AI has no ads and no subscriptions. Your gift helps cover
+          Emunah AI has no ads and no subscriptions. Your gift helps cover
           the AI and server costs and pays for new features.
         </AppText>
 

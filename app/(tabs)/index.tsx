@@ -305,7 +305,7 @@ export default function HomeScreen() {
               accent
               numberOfLines={1}
             >
-              {title || "Study with Scripture AI"}
+              {title || "Study with Emunah AI"}
             </AppText>
 
             <View style={tw`flex-row items-center gap-4`}>

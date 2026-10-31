@@ -47,7 +47,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
           <ActivityIndicator size="large" color={colors.primary} />
           <View style={tw`items-center`}>
             <Text style={tw`text-[${colors.text.primary}] text-lg font-semibold mb-1`}>
-              Scripture AI
+              Emunah AI
             </Text>
             <Text style={tw`text-[${colors.text.secondary}] text-base`}>
               Preparing your spiritual journey...

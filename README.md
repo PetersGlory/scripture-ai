@@ -1,4 +1,4 @@
-# Scripture AI
+# Emunah AI
 
 A Bible-based productivity and spiritual guidance app that provides AI-powered responses grounded in the Holy Bible.
 

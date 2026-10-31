@@ -1,30 +1,77 @@
+
 /**
- * Theme colors for the app. Light-only design; the dark map remains for
- * template compatibility (ThemedView/useThemeColor) but is not surfaced in UI.
+ * EmunahAI Brand Theme
+ * Premium Christian AI Bible Study App
+ *
+ * Brand identity:
+ * - Midnight Navy: Trust, depth, and stability
+ * - Royal Gold: Divine light, wisdom, and excellence
+ * - Warm Ivory: Peace, warmth, and readability
+ *
+ * Light and dark themes are both supported.
  */
 
-const tintColorLight = '#4A7C59';
-const tintColorDark = '#fff';
+const tintColorLight = '#E6AD52';
+const tintColorDark = '#E6AD52';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
+    // Core colors
+    text: '#14233D',
+    background: '#F7F4ED',
     tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+
+    // UI elements
+    icon: '#64748B',
+    tabIconDefault: '#64748B',
     tabIconSelected: tintColorLight,
+
+    // Brand colors
+    primary: '#06152F',
+    secondary: '#0D2344',
+    accent: '#E6AD52',
+    accentHighlight: '#F8D77A',
+
+    // Surfaces and borders
+    card: '#FFFFFF',
+    border: '#E5E0D5',
+
+    // Text hierarchy
+    textSecondary: '#64748B',
+    textMuted: '#9BA8BC',
   },
+
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    // Core colors
+    text: '#F7F4ED',
+    background: '#06152F',
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+
+    // UI elements
+    icon: '#9BA8BC',
+    tabIconDefault: '#9BA8BC',
     tabIconSelected: tintColorDark,
+
+    // Brand colors
+    primary: '#E6AD52',
+    secondary: '#0D2344',
+    accent: '#E6AD52',
+    accentHighlight: '#F8D77A',
+
+    // Surfaces and borders
+    card: '#0D2344',
+    border: '#203653',
+
+    // Text hierarchy
+    textSecondary: '#9BA8BC',
+    textMuted: '#718198',
   },
 };
 
-
-// Color combo
-export const PRIMARY_COLOR = "#4A7C59";
+// Main EmunahAI brand colors
+export const PRIMARY_COLOR = '#06152F';
+export const SECONDARY_COLOR = '#0D2344';
+export const ACCENT_COLOR = '#E6AD52';
+export const ACCENT_HIGHLIGHT = '#F8D77A';
+export const BACKGROUND_COLOR = '#F7F4ED';
+export const CARD_COLOR = '#FFFFFF';

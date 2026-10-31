@@ -18,15 +18,15 @@ import ScreenHeader from '@/components/ui/ScreenHeader';
 
 const faqItems = [
   {
-    question: 'What is Scripture-ai?',
-    answer: 'Scripture-ai is a Bible-based productivity and spiritual assistant app powered by AI. It helps you explore God\'s Word, seek clarity, and stay rooted in Scripture through meaningful, Spirit-led conversations.'
+    question: 'What is Emunah AI?',
+    answer: 'Emunah AI is a Bible-based productivity and spiritual assistant app powered by AI. It helps you explore God\'s Word, seek clarity, and stay rooted in Scripture through meaningful, Spirit-led conversations.'
   },
   {
-    question: 'Is Scripture-ai a replacement for Bible study?',
-    answer: 'No. Scripture-ai is a tool to enhance your personal Bible study, not replace it. It\'s designed to support meditation, devotion, and spiritual growth by helping you find biblical answers quickly and reflect on God\'s Word.'
+    question: 'Is Emunah AI a replacement for Bible study?',
+    answer: 'No. Emunah AI is a tool to enhance your personal Bible study, not replace it. It\'s designed to support meditation, devotion, and spiritual growth by helping you find biblical answers quickly and reflect on God\'s Word.'
   },
   {
-    question: 'What Bible translations does Scripture-ai use?',
+    question: 'What Bible translations does Emunah AI use?',
     answer: 'We currently support multiple trusted Bible translations including the King James Version (KJV), American Standard Version (ASV), and in future updates: The Pastor\'s Study Bible by Grace Ministries India.'
   },
   {
@@ -34,16 +34,16 @@ const faqItems = [
     answer: 'The AI doesn\'t "make up" answers. It uses an embedded search engine trained on Bible verses and study notes, retrieving relevant scriptures and commentary to answer your questions strictly from the Bible.'
   },
   {
-    question: 'Can I chat with Scripture-ai like ChatGPT?',
-    answer: 'Yes! Scripture-ai supports natural conversations including new chat sessions, conversation history, devotionals, encouragements, and scriptural reflections - all rooted in Scripture, not opinion.'
+    question: 'Can I chat with Emunah AI like ChatGPT?',
+    answer: 'Yes! Emunah AI supports natural conversations including new chat sessions, conversation history, devotionals, encouragements, and scriptural reflections - all rooted in Scripture, not opinion.'
   },
   {
-    question: 'Is Scripture-ai connected to external content?',
+    question: 'Is Emunah AI connected to external content?',
     answer: 'No. It does not search the internet. It works purely from the Bible knowledge base built into the app, ensuring every answer is grounded in Scripture alone.'
   },
   {
-    question: 'Can Scripture-ai answer theological questions?',
-    answer: 'Yes, to an extent. Scripture-ai can help you understand doctrinal themes, compare verses, and clarify teachings using contextual biblical references. However, for complex theology, we still encourage pastoral guidance.'
+    question: 'Can Emunah AI answer theological questions?',
+    answer: 'Yes, to an extent. Emunah AI can help you understand doctrinal themes, compare verses, and clarify teachings using contextual biblical references. However, for complex theology, we still encourage pastoral guidance.'
   },
   {
     question: 'Will my chat history be private?',
@@ -51,7 +51,7 @@ const faqItems = [
   },
   {
     question: 'Is there a mobile app or web version?',
-    answer: 'Yes! Scripture-ai is available as a mobile app (React Native-based) with a web version coming soon. Future plans include desktop and smartwatch support for daily devotion reminders.'
+    answer: 'Yes! Emunah AI is available as a mobile app (React Native-based) with a web version coming soon. Future plans include desktop and smartwatch support for daily devotion reminders.'
   },
   {
     question: 'What\'s planned for future versions?',

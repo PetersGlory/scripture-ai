@@ -21,7 +21,7 @@ const SECTIONS = [
   {
     heading: '3. Third-Party Services',
     paragraphs: [
-      'Scripture AI relies on carefully chosen third parties to operate: OpenRouter (AI responses), a public-domain Bible text service (Scripture passages), and standard hosting infrastructure. Each processes only the data needed to provide its part of the service.',
+      'Emunah AI relies on carefully chosen third parties to operate: OpenRouter (AI responses), a public-domain Bible text service (Scripture passages), and standard hosting infrastructure. Each processes only the data needed to provide its part of the service.',
     ],
   },
   {
@@ -39,7 +39,7 @@ const SECTIONS = [
   {
     heading: '6. Children\'s Privacy',
     paragraphs: [
-      'Scripture AI is not directed at children under 13, and we do not knowingly collect personal information from them.',
+      'Emunah AI is not directed at children under 13, and we do not knowingly collect personal information from them.',
     ],
   },
   {
@@ -61,7 +61,7 @@ export default function PrivacyScreen() {
     <LegalScreen
       title="Privacy Policy"
       updated="October 2026"
-      intro="Your trust matters to us. This policy explains what Scripture AI collects, why, and the choices you have."
+      intro="Your trust matters to us. This policy explains what Emunah AI collects, why, and the choices you have."
       sections={SECTIONS}
     />
   );

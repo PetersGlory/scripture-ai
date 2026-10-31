@@ -50,7 +50,7 @@ const Dot = ({ delay }: { delay: number }) => {
 };
 
 export const TypingIndicator = () => (
-  <View style={tw`mb-3 items-start`} accessibilityLabel="Scripture AI is typing">
+  <View style={tw`mb-3 items-start`} accessibilityLabel="Emunah AI is typing">
     <View style={tw`bg-gray-100 px-5 py-3 rounded-3xl rounded-tl-md`}>
       <View style={tw`flex-row items-center`}>
         <Dot delay={0} />

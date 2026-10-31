@@ -175,7 +175,7 @@ export default function ProfileScreen() {
   const handleRateApp = () => {
     // No published store listing yet — don't send users to a bogus page.
     Alert.alert(
-      'Enjoying Scripture AI?',
+      'Enjoying Emunah AI?',
       'The app store listing is coming soon. Thank you for your support!',
       [{ text: 'OK' }]
     );

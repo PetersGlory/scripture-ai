@@ -57,7 +57,7 @@ function EmptyState({
           No Chat History
         </AppText>
         <AppText style={tw`text-center text-[${colors.text.secondary}] mb-6`}>
-          Start a new conversation with Scripture AI
+          Start a new conversation with Emunah AI
         </AppText>
         <TouchableOpacity
           style={tw`bg-[${colors.primary}] px-6 py-3 rounded-2xl flex-row items-center`}

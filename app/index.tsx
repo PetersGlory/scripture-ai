@@ -20,7 +20,7 @@ const slides: OnboardingSlide[] = [
   {
     id: 1,
     icon: '✝️',
-    title: 'Welcome to\nScripture AI',
+    title: 'Welcome to\nEmunah AI',
     subtitle: 'Your AI-powered spiritual companion for deeper biblical understanding and spiritual growth',
     features: [
       'AI-powered biblical insights',
@@ -106,7 +106,7 @@ export default function WelcomeScreen() {
           </AppText>
           
           <AppText style={tw`text-gray-600 text-center text-sm mb-12 max-w-[300px] leading-6`}>
-            Continue your spiritual journey with Scripture AI
+            Continue your spiritual journey with Emunah AI
           </AppText>
 
           <TouchableOpacity 
