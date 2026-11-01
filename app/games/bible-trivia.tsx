@@ -1,5 +1,5 @@
 // app/games/bible-trivia.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -31,6 +31,12 @@ type Question = {
 };
 
 type GameMode = 'quick' | 'challenge' | 'daily';
+
+/** Questions per round. Fetched one at a time, never all up front. */
+const TOTAL_QUESTIONS = 10;
+
+const normalizeQuestionKey = (text: string) =>
+  text.trim().toLowerCase().replace(/\s+/g, ' ');
 
 const CATEGORIES = [
   { id: 'all', name: 'All Topics', icon: 'apps-outline' },
@@ -158,13 +164,26 @@ const OFFLINE_FALLBACK_POOL: Question[] = [
   },
 ];
 
-const buildOfflineFallback = (): Question[] => {
-  const shuffled = [...OFFLINE_FALLBACK_POOL];
+/**
+ * Serve one local backup question, skipping anything already asked this
+ * round. Shuffled every call so consecutive offline rounds don't replay the
+ * same set in the same order.
+ */
+const pickOfflineQuestion = (exclude: string[]): Question | null => {
+  const seen = new Set(exclude.map(normalizeQuestionKey));
+  const available = OFFLINE_FALLBACK_POOL.filter(
+    (q) => !seen.has(normalizeQuestionKey(q.question))
+  );
+  // Safety net: rounds are 10 and the pool is 12, so this only triggers if
+  // every remaining pool question was somehow already asked.
+  const source = available.length ? available : OFFLINE_FALLBACK_POOL;
+  const shuffled = [...source];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  return shuffled.slice(0, 10);
+  const q = shuffled[0];
+  return q ? { ...q, id: `${q.id}_${Date.now()}` } : null;
 };
 
 export default function BibleTriviaScreen() {
@@ -191,6 +210,20 @@ export default function BibleTriviaScreen() {
     const [correctAnswers, setCorrectAnswers] = useState(0);
     const [maxStreak, setMaxStreak] = useState(0);
     const [newAchievements, setNewAchievements] = useState<any[]>([]);
+
+  // One-question-at-a-time play: the next question is prefetched in the
+  // background while the user reads the explanation. Refs (not state) hold
+  // this bookkeeping so async fetches never see stale closures.
+  const [loadingNext, setLoadingNext] = useState(false);
+  const loadingNextRef = useRef(false);
+  const askedRef = useRef<string[]>([]);
+  const offlineRef = useRef(false);
+  const generationRef = useRef(0);
+  const prefetchRef = useRef<{
+    generation: number;
+    promise: Promise<Question | null> | null;
+    ready: Question | null;
+  }>({ generation: 0, promise: null, ready: null });
 
   // Timer effect: decrement only; timeout handled in a separate effect
   // so side effects never run inside a setState updater.
@@ -223,56 +256,119 @@ export default function BibleTriviaScreen() {
     setShowExplanation(true);
   };
 
-  const startGame = async () => {
-    setLoading(true);
-    try {
-      // Generate questions using AI
-      const generatedQuestions = await generateQuestions(selectedCategory, difficulty);
-      setQuestions(generatedQuestions);
-      setGameStarted(true);
-      setCurrentQuestionIndex(0);
-      setScore(0);
-      setLives(3);
-      setStreak(0);
-      setMaxStreak(0);
-      setCorrectAnswers(0);
-      setSelectedAnswer(null);
-      setShowExplanation(false);
-      setGameOver(false);
-      setTimeLeft(30);
-      setTimerActive(true);
-    } catch (error) {
-      setAlert({
-        visible: true,
-        title: 'Error',
-        message: 'Failed to generate questions. Please try again.',
-        type: 'error',
-      });
-    } finally {
-      setLoading(false);
+  /** Fetch a single question from the server, excluding ones already asked. */
+  const fetchOneQuestion = async (exclude: string[]): Promise<Question> => {
+    const response = await triviaService.generateTriviaQuestions(
+      selectedCategory,
+      difficulty,
+      1,
+      exclude
+    );
+    const generated = response?.questions;
+    if (Array.isArray(generated) && generated.length > 0) {
+      return generated[0] as Question;
     }
+    throw new Error('No question returned from server');
   };
 
-  const generateQuestions = async (category: string, difficulty: string): Promise<Question[]> => {
-    try {
-      const response = await triviaService.generateTriviaQuestions(category, difficulty, 10);
-      const generated = response?.questions;
-      if (Array.isArray(generated) && generated.length > 0) {
-        return generated;
+  /** The prefetch slot for this round; resets if the round changed. */
+  const getPrefetch = () => {
+    const gen = generationRef.current;
+    const pf = prefetchRef.current;
+    if (pf.generation !== gen) {
+      prefetchRef.current = { generation: gen, promise: null, ready: null };
+      return prefetchRef.current;
+    }
+    return pf;
+  };
+
+  /**
+   * Kick off a background fetch for the question after the current one.
+   * Never runs more than one at a time; result is stashed in the prefetch
+   * slot for handleNextQuestion to consume. Failures are silent here — the
+   * live fetch on the Next tap is what decides whether the round goes local.
+   */
+  const ensurePrefetch = () => {
+    if (offlineRef.current) return;
+    if (askedRef.current.length >= TOTAL_QUESTIONS) return;
+    const pf = getPrefetch();
+    if (pf.ready || pf.promise) return;
+
+    const gen = generationRef.current;
+    const promise = (async () => {
+      try {
+        const q = await fetchOneQuestion([...askedRef.current]);
+        if (generationRef.current !== gen) return null;
+        pf.ready = q;
+        return q;
+      } catch (error) {
+        console.error('Prefetch of next question failed:', error);
+        return null;
+      } finally {
+        if (generationRef.current === gen) pf.promise = null;
       }
-      throw new Error('No questions returned from server');
+    })();
+    pf.promise = promise;
+  };
+
+  const applyRoundStart = (first: Question) => {
+    askedRef.current = [first.question];
+    setQuestions([first]);
+    setGameStarted(true);
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setLives(3);
+    setStreak(0);
+    setMaxStreak(0);
+    setCorrectAnswers(0);
+    setSelectedAnswer(null);
+    setShowExplanation(false);
+    setGameOver(false);
+    setTimeLeft(30);
+    setTimerActive(true);
+  };
+
+  const startGame = async () => {
+    setLoading(true);
+    // Invalidate any prefetch still in flight from a previous round.
+    generationRef.current += 1;
+    askedRef.current = [];
+    offlineRef.current = false;
+    prefetchRef.current = {
+      generation: generationRef.current,
+      promise: null,
+      ready: null,
+    };
+
+    try {
+      // Question 1 only — the rest stream in as the round progresses.
+      const first = await fetchOneQuestion([]);
+      applyRoundStart(first);
+      ensurePrefetch();
     } catch (error) {
-      console.error('Error generating questions:', error);
+      console.error('Error generating first question:', error);
       // Be upfront: the AI round couldn't be generated, so this round uses
       // the built-in beginner set regardless of the chosen category/difficulty.
+      offlineRef.current = true;
       setAlert({
         visible: true,
         title: 'Using backup questions',
         message:
-          "AI question generation is unavailable right now, so this round uses our built-in beginner questions.",
+          'AI question generation is unavailable right now, so this round uses our built-in beginner questions.',
         type: 'warning',
       });
-      return buildOfflineFallback();
+      const first = pickOfflineQuestion([]);
+      if (first) applyRoundStart(first);
+      else {
+        setAlert({
+          visible: true,
+          title: 'Error',
+          message: 'Failed to generate questions. Please try again.',
+          type: 'error',
+        });
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -306,15 +402,68 @@ export default function BibleTriviaScreen() {
     }
   };
 
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+  const handleNextQuestion = async () => {
+    if (loadingNextRef.current) return;
+    const nextIndex = currentQuestionIndex + 1;
+    if (nextIndex >= TOTAL_QUESTIONS) {
+      endGame(lives);
+      return;
+    }
+
+    loadingNextRef.current = true;
+    setLoadingNext(true);
+    try {
+      let next: Question | null = null;
+
+      if (offlineRef.current) {
+        next = pickOfflineQuestion([...askedRef.current]);
+      } else {
+        // Prefer the prefetched question; wait on it if still in flight.
+        const pf = getPrefetch();
+        if (pf.ready) {
+          next = pf.ready;
+          pf.ready = null;
+        } else if (pf.promise) {
+          next = await pf.promise;
+        }
+        // Prefetch missed or failed — live fetch; only this failure flips
+        // the round to local backup questions.
+        if (!next) {
+          try {
+            next = await fetchOneQuestion([...askedRef.current]);
+          } catch (error) {
+            console.error('Error fetching next question:', error);
+            offlineRef.current = true;
+            setAlert({
+              visible: true,
+              title: 'Using backup questions',
+              message:
+                'AI question generation is unavailable right now, so the rest of this round uses our built-in beginner questions.',
+              type: 'warning',
+            });
+            next = pickOfflineQuestion([...askedRef.current]);
+          }
+        }
+      }
+
+      if (!next) {
+        endGame(lives);
+        return;
+      }
+
+      askedRef.current.push(next.question);
+      const question = next;
+      setQuestions((prev) => [...prev, question]);
+      setCurrentQuestionIndex(nextIndex);
       setSelectedAnswer(null);
       setShowExplanation(false);
       setTimeLeft(30);
       setTimerActive(true);
-    } else {
-      endGame(lives);
+      // Start fetching the question after this one while the user plays it.
+      ensurePrefetch();
+    } finally {
+      loadingNextRef.current = false;
+      setLoadingNext(false);
     }
   };
 
@@ -323,7 +472,7 @@ export default function BibleTriviaScreen() {
     setGameOver(true);
 
     const questionsAnswered = currentQuestionIndex + 1;
-    const isPerfect = finalLives === 3 && correctAnswers === questions.length;
+    const isPerfect = finalLives === 3 && correctAnswers === TOTAL_QUESTIONS;
 
     try {
       const result = await updateGameStats({
@@ -343,6 +492,13 @@ export default function BibleTriviaScreen() {
   };
 
   const resetGame = () => {
+    // Drop any in-flight prefetch from the round being abandoned.
+    generationRef.current += 1;
+    prefetchRef.current = {
+      generation: generationRef.current,
+      promise: null,
+      ready: null,
+    };
     setGameStarted(false);
     setGameOver(false);
     setCurrentQuestionIndex(0);
@@ -444,7 +600,7 @@ export default function BibleTriviaScreen() {
           {/* Start Button */}
           <AppButton
             title="Start Game"
-            loadingTitle="Generating Questions..."
+            loadingTitle="Generating Question..."
             onPress={startGame}
             loading={loading}
           />
@@ -464,7 +620,7 @@ export default function BibleTriviaScreen() {
   // Game Over Screen
   if (gameOver) {
     const percentage = questions.length > 0
-      ? Math.round((correctAnswers / questions.length) * 100)
+      ? Math.round((correctAnswers / TOTAL_QUESTIONS) * 100)
       : 0;
     
     return (
@@ -499,7 +655,7 @@ export default function BibleTriviaScreen() {
               <View style={tw`flex-row items-center justify-between`}>
                 <AppText style={tw`text-gray-600`}>Correct Answers</AppText>
                 <AppText style={tw`text-gray-900`} weight="bold">
-                  {correctAnswers} / {questions.length}
+                  {correctAnswers} / {TOTAL_QUESTIONS}
                 </AppText>
               </View>
 
@@ -540,7 +696,7 @@ export default function BibleTriviaScreen() {
           <View style={tw`w-full gap-3`}>
             <AppButton
               title="Play Again"
-              loadingTitle="Generating Questions..."
+              loadingTitle="Generating Question..."
               onPress={startGame}
               loading={loading}
             />
@@ -611,7 +767,7 @@ export default function BibleTriviaScreen() {
         {/* Progress Bar */}
         <View style={tw`flex-row items-center justify-between mb-2`}>
           <AppText style={tw`text-xs text-gray-600`}>
-            Question {currentQuestionIndex + 1} of {questions.length}
+            Question {currentQuestionIndex + 1} of {TOTAL_QUESTIONS}
           </AppText>
           {streak > 0 && (
             <View style={tw`flex-row items-center`}>
@@ -624,7 +780,7 @@ export default function BibleTriviaScreen() {
         <View style={tw`h-2 bg-gray-200 rounded-full overflow-hidden`}>
           <View 
             style={[tw`h-full bg-[${PRIMARY_COLOR}]`, { 
-              width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` 
+              width: `${((currentQuestionIndex + 1) / TOTAL_QUESTIONS) * 100}%` 
             }]} 
           />
         </View>
@@ -733,10 +889,20 @@ export default function BibleTriviaScreen() {
           <TouchableOpacity
             style={tw`bg-[${PRIMARY_COLOR}] py-4 rounded-2xl`}
             onPress={handleNextQuestion}
+            disabled={loadingNext}
           >
-            <AppText style={tw`text-white text-center text-base`} weight="bold">
-              {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish Game'}
-            </AppText>
+            {loadingNext ? (
+              <View style={tw`flex-row items-center justify-center`}>
+                <ActivityIndicator size="small" color="white" style={tw`mr-2`} />
+                <AppText style={tw`text-white text-center text-base`} weight="bold">
+                  Loading...
+                </AppText>
+              </View>
+            ) : (
+              <AppText style={tw`text-white text-center text-base`} weight="bold">
+                {currentQuestionIndex < TOTAL_QUESTIONS - 1 ? 'Next Question' : 'Finish Game'}
+              </AppText>
+            )}
           </TouchableOpacity>
         )}
       </ScrollView>

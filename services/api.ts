@@ -78,12 +78,19 @@ export const authService = {
 
 // Trivia
 export const triviaService = {
+  // One question at a time: pass count=1 and the texts already asked this
+  // round so the server never serves a repeat.
   generateTriviaQuestions: async (
     category: string,
     difficulty: string,
-    count: number = 5
+    count: number = 5,
+    exclude: string[] = []
   ) => {
-    const response = await api.post('/trivia/generate', { category, difficulty, count }, { timeout: AI_TIMEOUT_MS });
+    const response = await api.post(
+      '/trivia/generate',
+      { category, difficulty, count, exclude },
+      { timeout: AI_TIMEOUT_MS }
+    );
     return response.data;
   },
   getTriviaCategories: async () => {
