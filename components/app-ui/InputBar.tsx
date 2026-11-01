@@ -5,6 +5,7 @@ import {
   View,
 } from "react-native";
 import tw from "twrnc";
+import { PRIMARY_COLOR } from "@/constants/Colors";
 
 export const InputBar = ({
   message,
@@ -57,7 +58,7 @@ export const InputBar = ({
               size={30}
               color={
                 message.trim() && !isLoading
-                  ? "#4A7C59"
+                  ? PRIMARY_COLOR
                   : "#D1D5DB"
               }
             />

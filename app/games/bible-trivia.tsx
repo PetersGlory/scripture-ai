@@ -42,6 +42,131 @@ const CATEGORIES = [
   { id: 'parables', name: 'Parables', icon: 'chatbubble-outline' },
 ];
 
+/**
+ * Last-resort questions for when the trivia request itself fails (offline,
+ * server down). The pool is shuffled and sliced each call so consecutive
+ * offline rounds don't replay the same set in the same order.
+ */
+const OFFLINE_FALLBACK_POOL: Question[] = [
+  {
+    id: 'fb_1',
+    question: 'Who was the first king of Israel?',
+    options: ['David', 'Saul', 'Solomon', 'Samuel'],
+    correctAnswer: 1,
+    explanation: 'Saul was anointed as the first king of Israel by the prophet Samuel, as described in 1 Samuel 10:1.',
+    reference: '1 Samuel 10:1',
+    difficulty: 'easy',
+  },
+  {
+    id: 'fb_2',
+    question: 'How many days did God take to create the world?',
+    options: ['5 days', '6 days', '7 days', '8 days'],
+    correctAnswer: 1,
+    explanation: 'God created the world in 6 days and rested on the 7th day, as described in Genesis 1-2.',
+    reference: 'Genesis 1-2',
+    difficulty: 'easy',
+  },
+  {
+    id: 'fb_3',
+    question: 'What was the name of the garden where Adam and Eve lived?',
+    options: ['Garden of Gethsemane', 'Garden of Eden', 'Garden of Peace', 'Garden of Paradise'],
+    correctAnswer: 1,
+    explanation: 'Adam and Eve lived in the Garden of Eden before the fall, as described in Genesis 2:8.',
+    reference: 'Genesis 2:8',
+    difficulty: 'easy',
+  },
+  {
+    id: 'fb_4',
+    question: 'Who built the ark to survive the flood?',
+    options: ['Moses', 'Abraham', 'Noah', 'Joseph'],
+    correctAnswer: 2,
+    explanation: "Noah built the ark according to God's instructions to save his family and the animals from the flood.",
+    reference: 'Genesis 6-9',
+    difficulty: 'easy',
+  },
+  {
+    id: 'fb_5',
+    question: 'What did Jesus turn water into at the wedding in Cana?',
+    options: ['Milk', 'Wine', 'Juice', 'Oil'],
+    correctAnswer: 1,
+    explanation: 'Jesus performed his first miracle by turning water into wine at a wedding in Cana.',
+    reference: 'John 2:1-11',
+    difficulty: 'medium',
+  },
+  {
+    id: 'fb_6',
+    question: 'Who led the Israelites across the Jordan River into the Promised Land?',
+    options: ['Moses', 'Joshua', 'Caleb', 'Aaron'],
+    correctAnswer: 1,
+    explanation: 'After Moses died, Joshua took leadership of Israel and led the people across the Jordan into the promised land.',
+    reference: 'Joshua 3:14-17',
+    difficulty: 'easy',
+  },
+  {
+    id: 'fb_7',
+    question: 'Which prophet was swallowed by a great fish?',
+    options: ['Elijah', 'Jonah', 'Daniel', 'Isaiah'],
+    correctAnswer: 1,
+    explanation: 'Jonah tried to flee from God by sea and was swallowed by a great fish for three days and three nights.',
+    reference: 'Jonah 1:17',
+    difficulty: 'easy',
+  },
+  {
+    id: 'fb_8',
+    question: 'How many disciples did Jesus choose?',
+    options: ['Ten', 'Twelve', 'Seventy', 'One hundred twenty'],
+    correctAnswer: 1,
+    explanation: 'Jesus chose twelve apostles to be his closest followers and to carry his message.',
+    reference: 'Luke 6:13',
+    difficulty: 'easy',
+  },
+  {
+    id: 'fb_9',
+    question: 'What did David use to defeat Goliath?',
+    options: ['A sword', 'A bow', 'A sling and stones', 'A spear'],
+    correctAnswer: 2,
+    explanation: 'David used a sling and five smooth stones from the stream to bring down the giant Goliath.',
+    reference: '1 Samuel 17:40',
+    difficulty: 'easy',
+  },
+  {
+    id: 'fb_10',
+    question: 'Who was thrown into the lions\' den for praying to God?',
+    options: ['Shadrach', 'Daniel', 'Meshach', 'Ezekiel'],
+    correctAnswer: 1,
+    explanation: "Daniel continued praying to God despite a royal decree, and God shut the lions' mouths.",
+    reference: 'Daniel 6:10-23',
+    difficulty: 'easy',
+  },
+  {
+    id: 'fb_11',
+    question: 'Which apostle doubted Jesus had risen until he saw His wounds?',
+    options: ['Peter', 'Andrew', 'Thomas', 'James'],
+    correctAnswer: 2,
+    explanation: "Thomas declared he would not believe unless he saw and touched Jesus' wounds, and later called Him 'My Lord and my God.'",
+    reference: 'John 20:24-28',
+    difficulty: 'easy',
+  },
+  {
+    id: 'fb_12',
+    question: 'Who was the first Christian martyr?',
+    options: ['Peter', 'Stephen', 'Philip', 'James'],
+    correctAnswer: 1,
+    explanation: 'Stephen was stoned to death after defending the faith before the Jewish council, becoming the first recorded Christian martyr.',
+    reference: 'Acts 7:54-60',
+    difficulty: 'medium',
+  },
+];
+
+const buildOfflineFallback = (): Question[] => {
+  const shuffled = [...OFFLINE_FALLBACK_POOL];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled.slice(0, 10);
+};
+
 export default function BibleTriviaScreen() {
   const [gameStarted, setGameStarted] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -147,53 +272,7 @@ export default function BibleTriviaScreen() {
           "AI question generation is unavailable right now, so this round uses our built-in beginner questions.",
         type: 'warning',
       });
-      return [
-        {
-            id: '1',
-            question: 'Who was the first king of Israel?',
-            options: ['David', 'Saul', 'Solomon', 'Samuel'],
-            correctAnswer: 1,
-            explanation: 'Saul was anointed as the first king of Israel by the prophet Samuel, as described in 1 Samuel 10:1.',
-            reference: '1 Samuel 10:1',
-            difficulty: 'easy',
-        },
-        {
-            id: '2',
-            question: 'How many days did God take to create the world?',
-            options: ['5 days', '6 days', '7 days', '8 days'],
-            correctAnswer: 1,
-            explanation: 'God created the world in 6 days and rested on the 7th day, as described in Genesis 1-2.',
-            reference: 'Genesis 1-2',
-            difficulty: 'easy',
-        },
-        {
-            id: '3',
-            question: 'What was the name of the garden where Adam and Eve lived?',
-            options: ['Garden of Gethsemane', 'Garden of Eden', 'Garden of Peace', 'Garden of Paradise'],
-            correctAnswer: 1,
-            explanation: 'Adam and Eve lived in the Garden of Eden before the fall, as described in Genesis 2:8.',
-            reference: 'Genesis 2:8',
-            difficulty: 'easy',
-        },
-        {
-            id: '4',
-            question: 'Who built the ark to survive the flood?',
-            options: ['Moses', 'Abraham', 'Noah', 'Joseph'],
-            correctAnswer: 2,
-            explanation: 'Noah built the ark according to God\'s instructions to save his family and the animals from the flood.',
-            reference: 'Genesis 6-9',
-            difficulty: 'easy',
-        },
-        {
-            id: '5',
-            question: 'What did Jesus turn water into at the wedding in Cana?',
-            options: ['Milk', 'Wine', 'Juice', 'Oil'],
-            correctAnswer: 1,
-            explanation: 'Jesus performed his first miracle by turning water into wine at a wedding in Cana.',
-            reference: 'John 2:1-11',
-            difficulty: 'medium',
-        },
-      ];
+      return buildOfflineFallback();
     }
   };
 

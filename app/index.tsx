@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppText from '@/components/ui/AppText';
+import { PRIMARY_COLOR } from '@/constants/Colors';
 
 type OnboardingSlide = {
   id: number;
@@ -101,7 +102,7 @@ export default function WelcomeScreen() {
             Welcome back,
           </AppText>
           
-          <AppText style={tw`text-xl mb-3 text-[#4A7C59] text-center`}>
+          <AppText style={tw`text-xl mb-3 text-[${PRIMARY_COLOR}] text-center`}>
             {user.name}!
           </AppText>
           
@@ -110,7 +111,7 @@ export default function WelcomeScreen() {
           </AppText>
 
           <TouchableOpacity 
-            style={tw`bg-[#4A7C59] px-12 py-4 rounded-full flex-row items-center `}
+            style={tw`bg-[${PRIMARY_COLOR}] px-12 py-4 rounded-full flex-row items-center `}
             onPress={() => router.push('/(tabs)')}
           >
             <AppText style={tw`text-white text-lg font-semibold mr-2`}>
@@ -175,7 +176,7 @@ export default function WelcomeScreen() {
             <View style={tw`w-full max-w-[320px] mb-8`}>
               {slides[currentSlide].features.map((feature, idx) => (
                 <View key={idx} style={tw`flex-row items-center mb-3`}>
-                  <View style={tw`w-6 h-6 rounded-full bg-[#4A7C59] items-center justify-center mr-3`}>
+                  <View style={tw`w-6 h-6 rounded-full bg-[${PRIMARY_COLOR}] items-center justify-center mr-3`}>
                     <Ionicons name="checkmark" size={16} color="white" />
                   </View>
                   <AppText style={tw`text-gray-700 text-sm flex-1`}>
@@ -198,7 +199,7 @@ export default function WelcomeScreen() {
                 {
                   width: index === currentSlide ? 24 : 8,
                   backgroundColor: index === currentSlide 
-                    ? '#4A7C59'
+                    ? PRIMARY_COLOR
                     : '#E5E7EB',
                 }
               ]}
@@ -211,7 +212,7 @@ export default function WelcomeScreen() {
           {currentSlide === slides.length - 1 ? (
             <View style={tw`gap-3`}>
               <TouchableOpacity 
-                style={tw`bg-[#4A7C59] py-4 rounded-full items-center `}
+                style={tw`bg-[${PRIMARY_COLOR}] py-4 rounded-full items-center `}
                 onPress={() => router.push('/sign-up')}
               >
                 <AppText style={tw`text-white text-base`} weight='bold'>
@@ -246,7 +247,7 @@ export default function WelcomeScreen() {
 
               {/* Next Button */}
               <TouchableOpacity 
-                style={tw`flex-1 bg-[#4A7C59] py-4 rounded-full items-center `}
+                style={tw`flex-1 bg-[${PRIMARY_COLOR}] py-4 rounded-full items-center `}
                 onPress={() => setCurrentSlide(currentSlide + 1)}
               >
                 <AppText style={tw`text-white text-base`} weight='bold'>

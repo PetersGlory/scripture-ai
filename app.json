@@ -2,7 +2,7 @@
   "expo": {
     "name": "Emunah AI",
     "slug": "scripture-ai",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "scripture-ai",

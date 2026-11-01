@@ -234,7 +234,7 @@ export default function SignUpScreen() {
               <AppText style={tw`text-gray-600 text-xs leading-5`}>
                 By signing up, you agree to our{' '}
                 <AppText
-                  style={tw`text-[#4A7C59] font-semibold underline`}
+                  style={tw`text-[${colors.primary}] font-semibold underline`}
                   onPress={() => router.push('/terms')}
                   accessibilityRole="link"
                 >
@@ -242,7 +242,7 @@ export default function SignUpScreen() {
                 </AppText>
                 {' '}and{' '}
                 <AppText
-                  style={tw`text-[#4A7C59] font-semibold underline`}
+                  style={tw`text-[${colors.primary}] font-semibold underline`}
                   onPress={() => router.push('/privacy')}
                   accessibilityRole="link"
                 >
@@ -275,7 +275,7 @@ export default function SignUpScreen() {
               onPress={() => router.push('/sign-in')}
               style={tw`active:opacity-60`}
             >
-              <AppText style={tw`text-[#4A7C59] font-bold text-base`}>
+              <AppText style={tw`text-[${colors.primary}] font-bold text-base`}>
                 Sign In
               </AppText>
             </TouchableOpacity>

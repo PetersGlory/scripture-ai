@@ -179,7 +179,7 @@ export default function SignInScreen() {
               onPress={() => router.push('/sign-up')}
               style={tw`active:opacity-60`}
             >
-              <AppText style={tw`text-[#4A7C59] font-bold text-base`}>
+              <AppText style={tw`text-[${colors.primary}] font-bold text-base`}>
                 Sign Up
               </AppText>
             </TouchableOpacity>

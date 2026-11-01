@@ -21,6 +21,7 @@ import { TypingIndicator } from "@/components/app-ui/typing-indicator";
 import { InputBar } from "@/components/app-ui/InputBar";
 import AppText from "@/components/ui/AppText";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { PRIMARY_COLOR } from "@/constants/Colors";
 
 
 export default function HomeScreen() {
@@ -318,7 +319,7 @@ export default function HomeScreen() {
                 accessibilityLabel="Bookmark this conversation"
               >
                 {isBookmarking ? (
-                  <ActivityIndicator color="#4A7C59" size="small" />
+                  <ActivityIndicator color={PRIMARY_COLOR} size="small" />
                 ) : (
                   <Ionicons
                     name={
@@ -327,7 +328,7 @@ export default function HomeScreen() {
                         : "bookmark"
                     }
                     size={24}
-                    color={sessionId ? "#4A7C59" : "#9CA3AF"}
+                    color={sessionId ? PRIMARY_COLOR : "#9CA3AF"}
                   />
                 )}
               </TouchableOpacity>

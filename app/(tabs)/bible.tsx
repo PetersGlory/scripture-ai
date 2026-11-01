@@ -11,7 +11,7 @@ import { router } from 'expo-router';
 import tw from 'twrnc';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '@/components/ui/AppText';
-import { PRIMARY_COLOR } from '@/constants/Colors';
+import { PRIMARY_COLOR, SECONDARY_COLOR } from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { getBibleBooks, getBookmarks } from '@/services/api';
 import { cacheBooks, getCachedBooks } from '@/services/bibleCache';
@@ -228,6 +228,13 @@ export default function BibleScreen() {
             color="#F59E0B"
             onPress={() => router.push('/bible/highlights')}
           />
+          <QuickActionCard
+            icon="cloud-download"
+            title="Offline"
+            description="Downloads"
+            color="#059669"
+            onPress={() => router.push('/bible/offline')}
+          />
         </View>
 
         {/* Verse of the Day */}
@@ -240,7 +247,7 @@ export default function BibleScreen() {
           })}
         >
           <LinearGradient
-            colors={[PRIMARY_COLOR, '#3A6347']}
+            colors={[PRIMARY_COLOR, SECONDARY_COLOR]}
             style={tw`rounded-2xl p-5`}
           >
             <View style={tw`flex-row items-center mb-3`}>

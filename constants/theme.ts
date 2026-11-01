@@ -1,11 +1,18 @@
-import { PRIMARY_COLOR } from "./Colors";
+import {
+  PRIMARY_COLOR,
+  SECONDARY_COLOR,
+  ACCENT_COLOR,
+  ACCENT_HIGHLIGHT,
+  BACKGROUND_COLOR,
+  CARD_COLOR,
+} from "./Colors";
 
 export const colors = {
-  primary: PRIMARY_COLOR, // sage green
-  primaryLight: '#E8F0EA',
-  primaryDark: '#3A6247',
-  secondary: '#FFB800', // gold
-  background: '#FFFFFF',
+  primary: PRIMARY_COLOR, // midnight navy
+  primaryLight: '#E8EDF5',
+  primaryDark: '#04101F',
+  secondary: ACCENT_COLOR, // royal gold
+  background: CARD_COLOR,
   surface: '#F8F9FA',
   text: {
     primary: '#1F2937', // near-black gray for headings/body
@@ -18,13 +25,13 @@ export const colors = {
   warning: '#ECC94B',
 };
 export const BRAND = {
-  primary: "#4A7C59",
-  forest: "#1F3D2B",
-  forestLight: "#2E5740",
-  gold: "#C9A45C",
-  paper: "#F5F0E3",
-  muted: "#6B7280",
-  chevron: "#9CA3AF",
+  primary: PRIMARY_COLOR,
+  forest: SECONDARY_COLOR,
+  forestLight: '#16335C',
+  gold: ACCENT_COLOR,
+  paper: BACKGROUND_COLOR,
+  muted: '#6B7280',
+  chevron: '#9CA3AF',
 } as const;
 export const spacing = {
   xs: 4,

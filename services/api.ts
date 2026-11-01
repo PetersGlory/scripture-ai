@@ -17,6 +17,12 @@ const api = axios.create({
   },
 });
 
+// Free-tier AI models are slow; the backend allows them ~30s before aborting,
+// so the chat client must wait longer than that or it gives up first.
+const AI_TIMEOUT_MS = 60000;
+// Bible passages retry upstream on 429, which can add a few seconds.
+const BIBLE_TIMEOUT_MS = 45000;
+
 // Attach the auth token (secure storage, with legacy AsyncStorage fallback)
 api.interceptors.request.use(
   async (config) => {
@@ -77,7 +83,7 @@ export const triviaService = {
     difficulty: string,
     count: number = 5
   ) => {
-    const response = await api.post('/trivia/generate', { category, difficulty, count });
+    const response = await api.post('/trivia/generate', { category, difficulty, count }, { timeout: AI_TIMEOUT_MS });
     return response.data;
   },
   getTriviaCategories: async () => {
@@ -88,7 +94,7 @@ export const triviaService = {
 
 // Chat AI
 export const chatWithAi = async (data: { message: string; sessionId?: string }) => {
-  const response = await api.post('/chats', data);
+  const response = await api.post('/chats', data, { timeout: AI_TIMEOUT_MS });
   return response.data;
 };
 
@@ -132,14 +138,16 @@ export const getBibleBooks = async () => {
 
 export const getBiblePassage = async (reference: string, version: string = 'kjv') => {
   const response = await api.get(`/bible/passage/${encodeURIComponent(reference)}`, {
-    params: { version }
+    params: { version },
+    timeout: BIBLE_TIMEOUT_MS,
   });
   return response.data;
 };
 
 export const getBibleChapter = async (book: string, chapter: number, version: string = 'kjv') => {
   const response = await api.get(`/bible/chapter/${book}/${chapter}`, {
-    params: { version }
+    params: { version },
+    timeout: BIBLE_TIMEOUT_MS,
   });
   return response.data;
 };

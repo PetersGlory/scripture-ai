@@ -33,7 +33,7 @@ const games: GameCard[] = [
     title: 'Bible Trivia',
     description: 'Test your biblical knowledge with AI-generated questions',
     icon: 'book-outline',
-    iconColor: '#4A7C59',
+    iconColor: PRIMARY_COLOR,
     available: true,
     difficulty: 'All Levels',
     route: '/games/bible-trivia',

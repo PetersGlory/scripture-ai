@@ -49,7 +49,7 @@ export const BOOK_CHAPTERS: Record<string, number> = {
 };
 
 /** Normalize a book name/abbr to a lowercase key with no spaces or punctuation. */
-function normalizeBookKey(book: string): string {
+export function normalizeBookKey(book: string): string {
   return book.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
@@ -166,6 +166,74 @@ export async function getBookDownloadStatus(
 
 /** Regex for a single-chapter reference: "John 3", "John 3:16", "John 3:16-18". */
 const SINGLE_REF_REGEX = /^\s*(.+?)\s+(\d{1,3})(?::(\d{1,3})(?:-(\d{1,3}))?)?\s*$/;
+
+/**
+ * One-pass summary of every cached chapter for a version.
+ * Returns a map of normalized book key → sorted chapter numbers so the
+ * offline screen can render all 66 books without 66 separate multiGet calls.
+ * Chapter lists are needed (not just counts) because a book may be cached
+ * under both its abbreviation and its full-name keys depending on how the
+ * reader was opened — callers union the two variants.
+ */
+export async function getDownloadSummary(
+  version: string
+): Promise<Record<string, number[]>> {
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    const prefix = `${CHAPTER_PREFIX}:${version}:`;
+    const chapters: Record<string, number[]> = {};
+    for (const key of keys) {
+      if (!key.startsWith(prefix)) continue;
+      const rest = key.slice(prefix.length);
+      const lastColon = rest.lastIndexOf(':');
+      if (lastColon < 1) continue;
+      const bookKey = rest.slice(0, lastColon);
+      const chapter = parseInt(rest.slice(lastColon + 1), 10);
+      if (!Number.isInteger(chapter) || chapter < 1) continue;
+      (chapters[bookKey] ||= []).push(chapter);
+    }
+    for (const list of Object.values(chapters)) list.sort((a, b) => a - b);
+    return chapters;
+  } catch (error) {
+    console.error('Error summarizing downloads:', error);
+    return {};
+  }
+}
+
+/**
+ * Remove every cached chapter for a book + version.
+ * Accepts any name/abbr variant — keys are normalized the same way as writes.
+ */
+export async function clearBookDownload(
+  book: string,
+  chapterCount: number,
+  version: string
+): Promise<void> {
+  if (!book || !Number.isInteger(chapterCount) || chapterCount < 1) return;
+  try {
+    const keys = Array.from({ length: chapterCount }, (_, i) =>
+      chapterKey(book, i + 1, version)
+    );
+    await AsyncStorage.multiRemove(keys);
+  } catch (error) {
+    console.error('Error clearing book download:', error);
+    throw error;
+  }
+}
+
+/** Remove every cached chapter for a version. Returns keys removed. */
+export async function clearAllDownloads(version: string): Promise<number> {
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    const prefix = `${CHAPTER_PREFIX}:${version}:`;
+    const targets = keys.filter((k) => k.startsWith(prefix));
+    if (targets.length > 0) await AsyncStorage.multiRemove(targets);
+    return targets.length;
+  } catch (error) {
+    console.error('Error clearing downloads:', error);
+    return 0;
+  }
+}
 
 export type CachedPassage = {
   reference: string;
